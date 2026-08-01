@@ -5,7 +5,26 @@ include '../includes/layout.php';
 
 $clinics = [];
 $notice = null;
+$noticeType = 'success';
 if ($connection instanceof PDO) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_clinic'])) {
+        try {
+            $stmt = $connection->prepare('INSERT INTO VaxClinic (Name, Street, City, Prov, PC, date) VALUES (:name, :street, :city, :prov, :pc, :date)');
+            $stmt->execute([
+                ':name' => trim($_POST['Name'] ?? ''),
+                ':street' => trim($_POST['Street'] ?? ''),
+                ':city' => trim($_POST['City'] ?? ''),
+                ':prov' => trim($_POST['Prov'] ?? ''),
+                ':pc' => trim($_POST['PC'] ?? ''),
+                ':date' => trim($_POST['date'] ?? ''),
+            ]);
+            $notice = 'Clinic created successfully.';
+        } catch (PDOException $e) {
+            $notice = 'Unable to create clinic: ' . $e->getMessage();
+            $noticeType = 'error';
+        }
+    }
+
     try {
         $clinics = $connection->query("SELECT VaxClinic.Name, VaxClinic.Street, VaxClinic.City, VaxClinic.Prov, VaxClinic.PC, VaxClinic.date,
                                       ShipTo.Lots, Vaccine.CompanyName, Vaccine.Doses
@@ -46,43 +65,84 @@ if ($connection instanceof PDO) {
     </header>
 
     <?php if ($notice): ?>
-      <div class="notice error"><?php echo htmlspecialchars($notice); ?></div>
+      <div class="notice <?php echo $noticeType === 'error' ? 'error' : ''; ?>"><?php echo htmlspecialchars($notice); ?></div>
     <?php endif; ?>
 
-    <section class="panel">
-      <div class="panel-header">
-        <div>
-          <h2>Clinic Directory</h2>
-          <p class="muted">Filter by clinic, city, postal code, manufacturer, or lot.</p>
+    <section class="grid two-column">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Clinic Directory</h2>
+            <p class="muted">Filter by clinic, city, postal code, manufacturer, or lot.</p>
+          </div>
+          <input type="search" placeholder="Filter clinics" data-table-filter="#clinics-table" aria-label="Filter clinic records">
         </div>
-        <input type="search" placeholder="Filter clinics" data-table-filter="#clinics-table" aria-label="Filter clinic records">
-      </div>
-      <div class="panel-body">
-        <table class="data-table" id="clinics-table">
-          <thead>
-            <tr>
-              <th>Clinic</th>
-              <th>Address</th>
-              <th>Operating Date</th>
-              <th>Assigned Lot</th>
-              <th>Vaccine</th>
-              <th>Doses</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($clinics as $clinic): ?>
+        <div class="panel-body">
+          <table class="data-table" id="clinics-table">
+            <thead>
               <tr>
-                <td><?php echo htmlspecialchars($clinic['Name']); ?></td>
-                <td><?php echo htmlspecialchars($clinic['Street'] . ', ' . $clinic['City'] . ', ' . $clinic['Prov'] . ' ' . $clinic['PC']); ?></td>
-                <td><?php echo htmlspecialchars($clinic['date']); ?></td>
-                <td><?php echo htmlspecialchars($clinic['Lots'] ?? 'Not assigned'); ?></td>
-                <td><?php echo htmlspecialchars($clinic['CompanyName'] ?? 'Pending'); ?></td>
-                <td><?php echo htmlspecialchars($clinic['Doses'] ?? '-'); ?></td>
+                <th>Clinic</th>
+                <th>Address</th>
+                <th>Operating Date</th>
+                <th>Assigned Lot</th>
+                <th>Vaccine</th>
+                <th>Doses</th>
               </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <?php foreach ($clinics as $clinic): ?>
+                <tr>
+                  <td><?php echo htmlspecialchars($clinic['Name']); ?></td>
+                  <td><?php echo htmlspecialchars($clinic['Street'] . ', ' . $clinic['City'] . ', ' . $clinic['Prov'] . ' ' . $clinic['PC']); ?></td>
+                  <td><?php echo htmlspecialchars($clinic['date']); ?></td>
+                  <td><?php echo htmlspecialchars($clinic['Lots'] ?? 'Not assigned'); ?></td>
+                  <td><?php echo htmlspecialchars($clinic['CompanyName'] ?? 'Pending'); ?></td>
+                  <td><?php echo htmlspecialchars($clinic['Doses'] ?? '-'); ?></td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      <aside class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Add Clinic</h2>
+            <p class="muted">Create a clinic site that can receive vaccine shipments.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form class="form-grid" method="POST" action="clinics.php">
+            <input type="hidden" name="create_clinic" value="1">
+            <div class="field full">
+              <label for="Name">Clinic Name</label>
+              <input id="Name" name="Name" maxlength="30" required>
+            </div>
+            <div class="field full">
+              <label for="Street">Street</label>
+              <input id="Street" name="Street" maxlength="30" required>
+            </div>
+            <div class="field">
+              <label for="City">City</label>
+              <input id="City" name="City" maxlength="30" required>
+            </div>
+            <div class="field">
+              <label for="Prov">Province</label>
+              <input id="Prov" name="Prov" maxlength="30" required>
+            </div>
+            <div class="field">
+              <label for="PC">Postal Code</label>
+              <input id="PC" name="PC" maxlength="30" required>
+            </div>
+            <div class="field">
+              <label for="date">Operating Date</label>
+              <input id="date" name="date" placeholder="2026-08-01" maxlength="11" required>
+            </div>
+            <button class="button primary full" type="submit">Create Clinic</button>
+          </form>
+        </div>
+      </aside>
     </section>
   </main>
 </div>

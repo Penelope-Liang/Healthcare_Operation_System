@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_patient'])) {
             $stmt = $connection->prepare('INSERT INTO Patient (OHIP, SpouseOHIP, FirstName, LastName, DOB) VALUES (:ohip, :spouse, :first, :last, :dob)');
             $stmt->execute([
                 ':ohip' => $ohip,
-                ':spouse' => $spouseOhip === '' ? 'NULL' : $spouseOhip,
+                ':spouse' => $spouseOhip === '' ? null : $spouseOhip,
                 ':first' => $firstName,
                 ':last' => $lastName,
                 ':dob' => $dob,

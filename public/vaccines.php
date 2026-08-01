@@ -5,16 +5,48 @@ include '../includes/layout.php';
 
 $vaccines = [];
 $shipments = [];
+$companies = [];
+$clinics = [];
+$notice = null;
+$noticeType = 'success';
 if ($connection instanceof PDO) {
-try {
-    $vaccines = $connection->query("SELECT Lot, CompanyName, Prodcution, Expiry, Doses FROM Vaccine ORDER BY CompanyName, Lot")->fetchAll(PDO::FETCH_ASSOC);
-    $shipments = $connection->query("SELECT ShipTo.Lots, ShipTo.Clinic, Vaccine.CompanyName, Vaccine.Doses
-                                     FROM ShipTo
-                                     JOIN Vaccine ON Vaccine.Lot = ShipTo.Lots
-                                     ORDER BY ShipTo.Clinic")->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    $dbError = $e->getMessage();
-}
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        try {
+            if (isset($_POST['create_vaccine'])) {
+                $stmt = $connection->prepare('INSERT INTO Vaccine (Lot, CompanyName, Prodcution, Expiry, Doses) VALUES (:lot, :company, :production, :expiry, :doses)');
+                $stmt->execute([
+                    ':lot' => trim($_POST['Lot'] ?? ''),
+                    ':company' => trim($_POST['CompanyName'] ?? ''),
+                    ':production' => trim($_POST['Prodcution'] ?? ''),
+                    ':expiry' => trim($_POST['Expiry'] ?? ''),
+                    ':doses' => (int) ($_POST['Doses'] ?? 0),
+                ]);
+                $notice = 'Vaccine lot created successfully.';
+            } elseif (isset($_POST['assign_shipment'])) {
+                $stmt = $connection->prepare('INSERT INTO ShipTo (Lots, Clinic) VALUES (:lot, :clinic)');
+                $stmt->execute([
+                    ':lot' => trim($_POST['Lots'] ?? ''),
+                    ':clinic' => trim($_POST['Clinic'] ?? ''),
+                ]);
+                $notice = 'Vaccine shipment assigned successfully.';
+            }
+        } catch (PDOException $e) {
+            $notice = 'Unable to save vaccine data: ' . $e->getMessage();
+            $noticeType = 'error';
+        }
+    }
+
+    try {
+        $companies = $connection->query("SELECT Name FROM Company ORDER BY Name")->fetchAll(PDO::FETCH_ASSOC);
+        $clinics = $connection->query("SELECT Name FROM VaxClinic ORDER BY Name")->fetchAll(PDO::FETCH_ASSOC);
+        $vaccines = $connection->query("SELECT Lot, CompanyName, Prodcution, Expiry, Doses FROM Vaccine ORDER BY CompanyName, Lot")->fetchAll(PDO::FETCH_ASSOC);
+        $shipments = $connection->query("SELECT ShipTo.Lots, ShipTo.Clinic, Vaccine.CompanyName, Vaccine.Doses
+                                         FROM ShipTo
+                                         JOIN Vaccine ON Vaccine.Lot = ShipTo.Lots
+                                         ORDER BY ShipTo.Clinic")->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $dbError = $e->getMessage();
+    }
 } elseif (isset($connectionError)) {
     $dbError = $connectionError;
 }
@@ -46,6 +78,9 @@ try {
 
     <?php if (isset($dbError)): ?>
       <div class="notice error">Database issue: <?php echo htmlspecialchars($dbError); ?></div>
+    <?php endif; ?>
+    <?php if ($notice): ?>
+      <div class="notice <?php echo $noticeType === 'error' ? 'error' : ''; ?>"><?php echo htmlspecialchars($notice); ?></div>
     <?php endif; ?>
 
     <section class="grid two-column">
@@ -86,6 +121,48 @@ try {
       <aside class="panel">
         <div class="panel-header">
           <div>
+            <h2>Add Vaccine Lot</h2>
+            <p class="muted">Create tracked inventory tied to an existing manufacturer.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form class="form-grid" method="POST" action="vaccines.php">
+            <input type="hidden" name="create_vaccine" value="1">
+            <div class="field">
+              <label for="Lot">Lot</label>
+              <input id="Lot" name="Lot" maxlength="30" required>
+            </div>
+            <div class="field">
+              <label for="CompanyName">Manufacturer</label>
+              <select id="CompanyName" name="CompanyName" required>
+                <option value="">Select company</option>
+                <?php foreach ($companies as $company): ?>
+                  <option value="<?php echo htmlspecialchars($company['Name']); ?>"><?php echo htmlspecialchars($company['Name']); ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="field">
+              <label for="Prodcution">Production</label>
+              <input id="Prodcution" name="Prodcution" placeholder="2026-08-01" maxlength="11" required>
+            </div>
+            <div class="field">
+              <label for="Expiry">Expiry</label>
+              <input id="Expiry" name="Expiry" placeholder="2027-08-01" maxlength="11" required>
+            </div>
+            <div class="field full">
+              <label for="Doses">Doses</label>
+              <input id="Doses" type="number" name="Doses" min="0" required>
+            </div>
+            <button class="button primary full" type="submit">Create Vaccine Lot</button>
+          </form>
+        </div>
+      </aside>
+    </section>
+
+    <section class="grid two-column" style="margin-top: 18px;">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
             <h2>Shipment Coverage</h2>
             <p class="muted">Clinic assignment checks for each vaccine lot.</p>
           </div>
@@ -114,6 +191,39 @@ try {
             <span class="tag">Foreign Key Coverage</span>
             <span class="tag amber">Empty State Tests</span>
           </div>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Assign Shipment</h2>
+            <p class="muted">Link an existing vaccine lot to a clinic.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form class="form-grid" method="POST" action="vaccines.php">
+            <input type="hidden" name="assign_shipment" value="1">
+            <div class="field full">
+              <label for="Lots">Lot</label>
+              <select id="Lots" name="Lots" required>
+                <option value="">Select lot</option>
+                <?php foreach ($vaccines as $vaccine): ?>
+                  <option value="<?php echo htmlspecialchars($vaccine['Lot']); ?>"><?php echo htmlspecialchars($vaccine['Lot'] . ' - ' . $vaccine['CompanyName']); ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="field full">
+              <label for="Clinic">Clinic</label>
+              <select id="Clinic" name="Clinic" required>
+                <option value="">Select clinic</option>
+                <?php foreach ($clinics as $clinic): ?>
+                  <option value="<?php echo htmlspecialchars($clinic['Name']); ?>"><?php echo htmlspecialchars($clinic['Name']); ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <button class="button primary full" type="submit">Assign Shipment</button>
+          </form>
         </div>
       </aside>
     </section>

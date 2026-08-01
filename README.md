@@ -9,10 +9,10 @@ The project was redesigned from a basic COVID-19 database interface into a clean
 - Dashboard summary for patients, vaccination records, clinics, and clinical workers
 - Patient management page with searchable vaccination history
 - Add patient form with required field and format validation
-- Vaccine inventory page with lot, manufacturer, production, expiry, dose, and shipment data
-- Worker assignment page for nurses and doctors across vaccination clinics
-- Clinic directory with addresses, operating dates, and linked vaccine shipments
-- Reports page with vaccination activity and staffing summaries
+- Vaccine inventory page with lot, manufacturer, production, expiry, dose, shipment data, and forms for creating lots and assigning shipments
+- Worker assignment page for nurses and doctors across vaccination clinics with a form for creating worker assignments
+- Clinic directory with addresses, operating dates, linked vaccine shipments, and a form for creating clinic sites
+- Reports page with vaccination activity, staffing summaries, and a form for creating vaccination records
 - Graceful database connection messaging when MySQL is not running
 
 ## Tech Stack
@@ -114,19 +114,19 @@ Users can review patient records, search across patient and vaccination data, an
 
 ### Vaccine Logistics
 
-Users can review vaccine lots, manufacturers, dose counts, production dates, expiry dates, and clinic shipment relationships.
+Users can review vaccine lots, manufacturers, dose counts, production dates, expiry dates, and clinic shipment relationships. Users can also create vaccine lots and assign existing lots to clinic sites.
 
 ### Clinic Network
 
-Users can view clinic locations, addresses, operating dates, and assigned vaccine lots.
+Users can view clinic locations, addresses, operating dates, and assigned vaccine lots. Users can also create new clinic site records.
 
 ### Worker Assignments
 
-Users can review nurse and doctor assignments by vaccination clinic.
+Users can review nurse and doctor assignments by vaccination clinic. Users can also create nurse or doctor records with credentials and clinic assignments.
 
 ### Operational Reports
 
-Users can review overall system counts, vaccination schedule data, and clinical staffing summaries.
+Users can review overall system counts, vaccination schedule data, and clinical staffing summaries. Users can also create vaccination records by selecting an existing patient, clinic, and vaccine lot.
 
 ## Automation Testing Roadmap
 

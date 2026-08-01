@@ -12,9 +12,30 @@ $report = [
     'doctors' => 0,
 ];
 $upcoming = [];
+$patients = [];
+$clinics = [];
+$vaccines = [];
 $notice = null;
+$noticeType = 'success';
 
 if ($connection instanceof PDO) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_vaccination'])) {
+        try {
+            $stmt = $connection->prepare('INSERT INTO Vaccination (OHIP, ClinicName, Lots, Date, Time) VALUES (:ohip, :clinic, :lot, :date, :time)');
+            $stmt->execute([
+                ':ohip' => trim($_POST['OHIP'] ?? ''),
+                ':clinic' => trim($_POST['ClinicName'] ?? ''),
+                ':lot' => trim($_POST['Lots'] ?? ''),
+                ':date' => trim($_POST['Date'] ?? ''),
+                ':time' => trim($_POST['Time'] ?? ''),
+            ]);
+            $notice = 'Vaccination record created successfully.';
+        } catch (PDOException $e) {
+            $notice = 'Unable to create vaccination record: ' . $e->getMessage();
+            $noticeType = 'error';
+        }
+    }
+
     try {
         $report['patients'] = (int) $connection->query("SELECT COUNT(*) FROM Patient")->fetchColumn();
         $report['vaccinated'] = (int) $connection->query("SELECT COUNT(*) FROM Vaccination")->fetchColumn();
@@ -28,11 +49,16 @@ if ($connection instanceof PDO) {
                                         JOIN Patient ON Patient.OHIP = Vaccination.OHIP
                                         JOIN Vaccine ON Vaccine.Lot = Vaccination.Lots
                                         ORDER BY Vaccination.Date, Vaccination.Time")->fetchAll(PDO::FETCH_ASSOC);
+        $patients = $connection->query("SELECT OHIP, FirstName, LastName FROM Patient ORDER BY LastName, FirstName")->fetchAll(PDO::FETCH_ASSOC);
+        $clinics = $connection->query("SELECT Name FROM VaxClinic ORDER BY Name")->fetchAll(PDO::FETCH_ASSOC);
+        $vaccines = $connection->query("SELECT Lot, CompanyName FROM Vaccine ORDER BY CompanyName, Lot")->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         $notice = 'Unable to load report data: ' . $e->getMessage();
+        $noticeType = 'error';
     }
 } elseif (isset($connectionError)) {
     $notice = 'Database is not connected: ' . $connectionError;
+    $noticeType = 'error';
 }
 ?>
 <!doctype html>
@@ -61,7 +87,7 @@ if ($connection instanceof PDO) {
     </header>
 
     <?php if ($notice): ?>
-      <div class="notice error"><?php echo htmlspecialchars($notice); ?></div>
+      <div class="notice <?php echo $noticeType === 'error' ? 'error' : ''; ?>"><?php echo htmlspecialchars($notice); ?></div>
     <?php endif; ?>
 
     <section class="grid stats-grid">
@@ -153,6 +179,56 @@ if ($connection instanceof PDO) {
           </div>
         </div>
       </aside>
+    </section>
+
+    <section class="panel" style="margin-top: 18px;">
+      <div class="panel-header">
+        <div>
+          <h2>Add Vaccination Record</h2>
+          <p class="muted">Schedule or record a patient vaccination using existing patient, clinic, and vaccine lot records.</p>
+        </div>
+      </div>
+      <div class="panel-body">
+        <form class="form-grid" method="POST" action="reports.php">
+          <input type="hidden" name="create_vaccination" value="1">
+          <div class="field">
+            <label for="OHIP">Patient</label>
+            <select id="OHIP" name="OHIP" required>
+              <option value="">Select patient</option>
+              <?php foreach ($patients as $patient): ?>
+                <option value="<?php echo htmlspecialchars($patient['OHIP']); ?>"><?php echo htmlspecialchars($patient['LastName'] . ', ' . $patient['FirstName'] . ' - ' . $patient['OHIP']); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ClinicName">Clinic</label>
+            <select id="ClinicName" name="ClinicName" required>
+              <option value="">Select clinic</option>
+              <?php foreach ($clinics as $clinic): ?>
+                <option value="<?php echo htmlspecialchars($clinic['Name']); ?>"><?php echo htmlspecialchars($clinic['Name']); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="field">
+            <label for="Lots">Vaccine Lot</label>
+            <select id="Lots" name="Lots" required>
+              <option value="">Select lot</option>
+              <?php foreach ($vaccines as $vaccine): ?>
+                <option value="<?php echo htmlspecialchars($vaccine['Lot']); ?>"><?php echo htmlspecialchars($vaccine['Lot'] . ' - ' . $vaccine['CompanyName']); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="field">
+            <label for="Date">Date</label>
+            <input id="Date" type="date" name="Date" required>
+          </div>
+          <div class="field full">
+            <label for="Time">Time</label>
+            <input id="Time" type="time" name="Time" required>
+          </div>
+          <button class="button primary full" type="submit">Create Vaccination Record</button>
+        </form>
+      </div>
     </section>
   </main>
 </div>
