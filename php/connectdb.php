@@ -2,7 +2,12 @@
 try {
     $connection = new PDO('mysql:host=localhost; dbname=covidDB', "root", "");
 } catch (PDOException $e) {
-    print "Error!: ". $e->getMessage(). "<br/>";
-    die();
+    if (!empty($dbOptional)) {
+        $connection = NULL;
+        $connectionError = $e->getMessage();
+    } else {
+        print "Error!: ". $e->getMessage(). "<br/>";
+        die();
+    }
 }
 ?>
