@@ -85,7 +85,7 @@ try {
         <p class="lead">Use this workspace to manage patient identity details, vaccination status, clinic assignment, and appointment history.</p>
       </div>
       <div class="header-actions">
-        <a class="button" href="next.php">Legacy OHIP Search</a>
+        <a class="button" href="reports.php">Reports</a>
         <a class="button primary" href="#add-patient">Add Patient</a>
       </div>
     </header>

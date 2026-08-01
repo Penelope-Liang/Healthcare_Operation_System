@@ -41,7 +41,7 @@ The project was redesigned from a basic COVID-19 database interface into a clean
 |   |-- styles.css
 |   |-- vaccines.php
 |   `-- workers.php
-`-- pic/
+
 ```
 
 Legacy PHP pages are still included for compatibility with the original project flow.

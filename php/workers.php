@@ -44,7 +44,7 @@ try {
         <p class="lead">Staffing data helps clinic coordinators review provider availability across patient registration and vaccine inventory workflows.</p>
       </div>
       <div class="header-actions">
-        <a class="button" href="worker.php">Legacy Worker Lookup</a>
+        <a class="button" href="clinics.php">Clinics</a>
         <a class="button primary" href="reports.php">Reports</a>
       </div>
     </header>

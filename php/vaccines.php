@@ -39,7 +39,7 @@ try {
         <p class="lead">The logistics view supports data consistency tests across vaccine inventory and clinic shipment relationships.</p>
       </div>
       <div class="header-actions">
-        <a class="button" href="type.php">Legacy Lot Lookup</a>
+        <a class="button" href="reports.php">Reports</a>
         <a class="button primary" href="clinics.php">Clinic Shipments</a>
       </div>
     </header>
