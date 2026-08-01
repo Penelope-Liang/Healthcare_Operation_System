@@ -96,7 +96,7 @@ select .lt { text-align: center; }
 <center>
 <?php
 if (isset($_POST['save'])){
-  include "connectdb.php";
+  include "../../includes/connectdb.php";
   $location = $_POST['location'];
   $number = $_POST['number'];
   $d=$_POST['d'];
@@ -132,7 +132,7 @@ $row= $result1->fetch();
     </table>  
 
     <br>
-<form action="covid.php">
+<form action="../covid.php">
   <label></label>
   <button type="next" name="next" value="next">Return to Homepage</button><br><br>
 </form>

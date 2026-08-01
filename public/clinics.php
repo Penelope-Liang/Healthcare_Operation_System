@@ -1,7 +1,7 @@
 <?php
 $dbOptional = true;
-include 'connectdb.php';
-include 'layout.php';
+include '../includes/connectdb.php';
+include '../includes/layout.php';
 
 $clinics = [];
 $notice = null;
@@ -26,8 +26,8 @@ if ($connection instanceof PDO) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Clinics | Healthcare Operations Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js" defer></script>
 </head>
 <body>
 <div class="app-shell">

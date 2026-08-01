@@ -43,9 +43,9 @@
 </head>
 <body>
 <?php
-include 'connectdb.php';
+include '../../includes/connectdb.php';
 ?>
-<form action="covid.php" method="post">
+<form action="../covid.php" method="post">
 <center>
 
 </form>

@@ -1,7 +1,7 @@
 <?php
 $dbOptional = true;
-include 'connectdb.php';
-include 'layout.php';
+include '../includes/connectdb.php';
+include '../includes/layout.php';
 
 $notice = null;
 $noticeType = 'success';
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_patient'])) {
         $notice = 'Date of birth is required.';
         $noticeType = 'error';
     } elseif (!($connection instanceof PDO)) {
-        $notice = 'Database is not connected. Start MySQL and import covidDB.sql before creating records.';
+        $notice = 'Database is not connected. Start MySQL and import database/covidDB.sql before creating records.';
         $noticeType = 'error';
     } else {
         try {
@@ -71,8 +71,8 @@ try {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Patients | Healthcare Operations Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js" defer></script>
 </head>
 <body>
 <div class="app-shell">

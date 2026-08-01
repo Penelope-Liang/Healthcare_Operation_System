@@ -89,7 +89,7 @@ select .lt { text-align: center; }
 </head>
 
 <?php
-include "connectdb.php";
+include "../../includes/connectdb.php";
 ?>
 
 <?php

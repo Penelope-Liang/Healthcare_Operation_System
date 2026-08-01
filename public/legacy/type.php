@@ -78,7 +78,7 @@ select .lt { text-align: center; }
 <center>
 <h1>Vaccine Information</h1>
 <?php
-	include "connectdb.php";
+	include "../../includes/connectdb.php";
 ?>
 <?php
 $query = "SELECT * FROM ShipTo";
@@ -97,7 +97,7 @@ $result = $connection->query($query);
 </form>
 
 <br>
-<form action="covid.php" method="POST">
+<form action="../covid.php" method="POST">
   <label></label>
   <button type="next" name="next" value="next">Return to Homepage</button><br><br>
 </form>

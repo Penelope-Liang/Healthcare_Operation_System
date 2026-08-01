@@ -73,7 +73,7 @@ select .lt { text-align: center; }
 <center>
 <h1>Vaccine Information</h1>
 <?php
-	include "connectdb.php";
+	include "../../includes/connectdb.php";
 ?>
 <?php
 $query = "SELECT * FROM Patient";
@@ -109,14 +109,14 @@ $result1 = $connection->query($query);
 </form>
 
 <br>
-<form action="covid.php" method="POST">
+<form action="../covid.php" method="POST">
   <label></label>
   <button type="next" name="next" value="next">Return to Homepage</button><br><br>
 </form>
 
 <?php
 if (isset($_POST) && !empty($_POST)) {
-    include "connectdb.php";
+    include "../../includes/connectdb.php";
     $FirstName = $_POST['FirstName'];
     $LastName = $_POST['LastName'];
     if ($FirstName && $FirstName) {

@@ -28,29 +28,33 @@ The project was redesigned from a basic COVID-19 database interface into a clean
 
 ```text
 .
-|-- covidDB.sql
-|-- php/
-|   |-- app.js
-|   |-- clinics.php
+|-- database/
+|   `-- covidDB.sql
+|-- includes/
 |   |-- connectdb.php
+|   `-- layout.php
+|-- public/
+|   |-- assets/
+|   |   |-- app.js
+|   |   `-- styles.css
+|   |-- clinics.php
 |   |-- covid.php
 |   |-- index.php
-|   |-- layout.php
+|   |-- legacy/
 |   |-- patients.php
 |   |-- reports.php
-|   |-- styles.css
 |   |-- vaccines.php
 |   `-- workers.php
 
 ```
 
-Legacy PHP pages are still included for compatibility with the original project flow.
+The `public/` directory is the web root. Shared PHP includes live in `includes/`, static browser assets live in `public/assets/`, database setup lives in `database/`, and legacy PHP pages live in `public/legacy/` for compatibility with the original project flow.
 
 ## Database Setup
 
 The application expects a MySQL database named `covidDB`.
 
-Default connection settings are defined in `php/connectdb.php`:
+Default connection settings are defined in `includes/connectdb.php`:
 
 ```text
 host: localhost
@@ -62,14 +66,14 @@ password: empty
 To import the database with XAMPP:
 
 ```bash
-/Applications/XAMPP/xamppfiles/bin/mysql -u root < covidDB.sql
+/Applications/XAMPP/xamppfiles/bin/mysql -u root < database/covidDB.sql
 ```
 
 If `covidDB` already exists and needs to be recreated:
 
 ```bash
 /Applications/XAMPP/xamppfiles/bin/mysql -u root -e "DROP DATABASE IF EXISTS covidDB;"
-/Applications/XAMPP/xamppfiles/bin/mysql -u root < covidDB.sql
+/Applications/XAMPP/xamppfiles/bin/mysql -u root < database/covidDB.sql
 ```
 
 ## Run Locally
@@ -85,7 +89,7 @@ Place the project inside:
 Then start Apache and MySQL in XAMPP and open:
 
 ```text
-http://localhost/Healthcare_Operation_System/php/
+http://localhost/Healthcare_Operation_System/public/
 ```
 
 Option 2: Use the XAMPP PHP development server.
@@ -93,7 +97,7 @@ Option 2: Use the XAMPP PHP development server.
 From the project root:
 
 ```bash
-/Applications/XAMPP/xamppfiles/bin/php -S localhost:8000 -t php
+/Applications/XAMPP/xamppfiles/bin/php -S localhost:8000 -t public
 ```
 
 Then open:

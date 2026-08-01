@@ -78,7 +78,7 @@ select .lt { text-align: center; }
 <center>
 <h1>Vaccine Information</h1>
 <?php
-	include "connectdb.php";
+	include "../../includes/connectdb.php";
 ?>
 
 <?php
@@ -99,7 +99,7 @@ $result = $connection->query($query);
 
 <?php
 if (isset($_POST['submit'])) {
-    include "connectdb.php";
+    include "../../includes/connectdb.php";
     $VaxClinic = $_POST['VaxClinic'];
     $query = "SELECT Nurse.FirstName, Nurse.LastName, NurseWork.VaxClinicName,NurseCreds.NurseCredials FROM Nurse 
         JOIN NurseCreds ON NurseCreds.NurseId = Nurse.Id 
@@ -133,7 +133,7 @@ if (isset($_POST['submit'])) {
 ?>
 
 <br>
-<form action="covid.php" method="POST">
+<form action="../covid.php" method="POST">
   <label></label>
   <button type="next" name="next" value="next">Return to Homepage</button><br><br>
 </form>

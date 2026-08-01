@@ -45,7 +45,7 @@
 
 <body>  
 <?php
-include 'connectdb.php';
+include '../../includes/connectdb.php';
 ?>
 <center>
 <h1>Please Enter Your OHIP</h1>

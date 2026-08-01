@@ -53,7 +53,7 @@ $LastName="";
 $DOB="";
 
 if ((isset($_POST["add"]))) {
-    include 'connectdb.php';    
+    include '../../includes/connectdb.php';    
     if (empty($_POST['OHIP']) || empty($_POST['FirstName']) || empty($_POST['LastName']) || empty($_POST['DOB'])) {
         echo "<script> location.href='addpatient.php'; alert('Please finish the empty field');
              </script>";
