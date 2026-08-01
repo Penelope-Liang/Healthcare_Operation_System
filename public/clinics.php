@@ -55,8 +55,7 @@ if ($connection instanceof PDO) {
     <header class="page-header">
       <div>
         <p class="eyebrow">Clinic Network</p>
-        <h1>Clinic sites, operating dates, and assigned vaccine shipments.</h1>
-        <p class="lead">Use this view to monitor where vaccine lots are shipped and which clinics are active in the COVID-19 network.</p>
+        <h1>Clinics</h1>
       </div>
       <div class="header-actions">
         <a class="button" href="vaccines.php">Vaccine Inventory</a>
@@ -73,7 +72,6 @@ if ($connection instanceof PDO) {
         <div class="panel-header">
           <div>
             <h2>Clinic Directory</h2>
-            <p class="muted">Filter by clinic, city, postal code, manufacturer, or lot.</p>
           </div>
           <input type="search" placeholder="Filter clinics" data-table-filter="#clinics-table" aria-label="Filter clinic records">
         </div>
@@ -109,7 +107,6 @@ if ($connection instanceof PDO) {
         <div class="panel-header">
           <div>
             <h2>Add Clinic</h2>
-            <p class="muted">Create a clinic site that can receive vaccine shipments.</p>
           </div>
         </div>
         <div class="panel-body">

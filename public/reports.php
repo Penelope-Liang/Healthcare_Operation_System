@@ -76,9 +76,8 @@ if ($connection instanceof PDO) {
   <main class="main">
     <header class="page-header">
       <div>
-        <p class="eyebrow">Operational Reports</p>
-        <h1>Vaccination activity, clinic capacity, and staffing summary.</h1>
-        <p class="lead">A reporting view for reviewing system totals and scheduled vaccination records across the care network.</p>
+        <p class="eyebrow">Reports</p>
+        <h1>Activity Summary</h1>
       </div>
       <div class="header-actions">
         <a class="button" href="patients.php">Patients</a>
@@ -94,22 +93,18 @@ if ($connection instanceof PDO) {
       <article class="card">
         <div class="stat-value"><?php echo $report['patients']; ?></div>
         <div class="stat-label">Registered Patients</div>
-        <p class="stat-note">Total patient records in the system.</p>
       </article>
       <article class="card">
         <div class="stat-value"><?php echo $report['vaccinated']; ?></div>
         <div class="stat-label">Vaccination Records</div>
-        <p class="stat-note">Completed or scheduled vaccination entries.</p>
       </article>
       <article class="card">
         <div class="stat-value"><?php echo $report['clinics']; ?></div>
         <div class="stat-label">Clinic Sites</div>
-        <p class="stat-note">Active clinic records in the network.</p>
       </article>
       <article class="card">
         <div class="stat-value"><?php echo $report['vaccineLots']; ?></div>
         <div class="stat-label">Vaccine Lots</div>
-        <p class="stat-note">Tracked vaccine inventory lots.</p>
       </article>
     </section>
 
@@ -118,7 +113,6 @@ if ($connection instanceof PDO) {
         <div class="panel-header">
           <div>
             <h2>Vaccination Schedule</h2>
-            <p class="muted">Patient appointments by date, clinic, and manufacturer.</p>
           </div>
           <input type="search" placeholder="Filter schedule" data-table-filter="#schedule-table" aria-label="Filter schedule">
         </div>
@@ -152,30 +146,20 @@ if ($connection instanceof PDO) {
         <div class="panel-header">
           <div>
             <h2>Staffing Summary</h2>
-            <p class="muted">Clinical workforce currently tracked in the system.</p>
           </div>
         </div>
         <div class="panel-body coverage-list">
           <div class="coverage-item">
             <div>
-              <h3>Nurse records</h3>
-              <p class="muted">Nurses assigned across vaccination clinics.</p>
+              <h3>Nurses</h3>
             </div>
             <span class="tag green"><?php echo $report['nurses']; ?></span>
           </div>
           <div class="coverage-item">
             <div>
-              <h3>Doctor records</h3>
-              <p class="muted">Doctors assigned across vaccination clinics.</p>
+              <h3>Doctors</h3>
             </div>
             <span class="tag green"><?php echo $report['doctors']; ?></span>
-          </div>
-          <div class="coverage-item">
-            <div>
-              <h3>Operational status</h3>
-              <p class="muted">Review clinic, vaccine, and staffing records before patient intake.</p>
-            </div>
-            <span class="tag amber">Review</span>
           </div>
         </div>
       </aside>
@@ -185,7 +169,6 @@ if ($connection instanceof PDO) {
       <div class="panel-header">
         <div>
           <h2>Add Vaccination Record</h2>
-          <p class="muted">Schedule or record a patient vaccination using existing patient, clinic, and vaccine lot records.</p>
         </div>
       </div>
       <div class="panel-body">

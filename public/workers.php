@@ -96,8 +96,7 @@ if ($connection instanceof PDO) {
     <header class="page-header">
       <div>
         <p class="eyebrow">Clinical Staffing</p>
-        <h1>Nurse and doctor assignments by vaccination clinic.</h1>
-        <p class="lead">Staffing data helps clinic coordinators review provider availability across patient registration and vaccine inventory workflows.</p>
+        <h1>Workers</h1>
       </div>
       <div class="header-actions">
         <a class="button" href="clinics.php">Clinics</a>
@@ -117,7 +116,6 @@ if ($connection instanceof PDO) {
         <div class="panel-header">
           <div>
             <h2>Nurse Assignments</h2>
-            <p class="muted">Clinical role, credential, and assigned clinic.</p>
           </div>
           <input type="search" placeholder="Filter nurses" data-table-filter="#nurses-table" aria-label="Filter nurses">
         </div>
@@ -149,7 +147,6 @@ if ($connection instanceof PDO) {
         <div class="panel-header">
           <div>
             <h2>Doctor Assignments</h2>
-            <p class="muted">Provider assignments by clinic location.</p>
           </div>
           <input type="search" placeholder="Filter doctors" data-table-filter="#doctors-table" aria-label="Filter doctors">
         </div>
@@ -182,7 +179,6 @@ if ($connection instanceof PDO) {
       <div class="panel-header">
         <div>
           <h2>Add Worker Assignment</h2>
-          <p class="muted">Create a nurse or doctor record with credential and clinic assignment.</p>
         </div>
       </div>
       <div class="panel-body">

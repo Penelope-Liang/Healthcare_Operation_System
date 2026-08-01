@@ -80,9 +80,8 @@ try {
   <main class="main">
     <header class="page-header">
       <div>
-        <p class="eyebrow">Patient Workflow</p>
-        <h1>Patient records with validation and searchable vaccination history.</h1>
-        <p class="lead">Use this workspace to manage patient identity details, vaccination status, clinic assignment, and appointment history.</p>
+        <p class="eyebrow">Patients</p>
+        <h1>Patient Records</h1>
       </div>
       <div class="header-actions">
         <a class="button" href="reports.php">Reports</a>
@@ -99,7 +98,6 @@ try {
         <div class="panel-header">
           <div>
             <h2>Patient Records</h2>
-            <p class="muted">Search by name, OHIP, vaccine manufacturer, or clinic.</p>
           </div>
           <input type="search" placeholder="Filter records" data-table-filter="#patients-table" aria-label="Filter patient records">
         </div>
@@ -135,7 +133,6 @@ try {
         <div class="panel-header">
           <div>
             <h2>Add Patient</h2>
-            <p class="muted">Required field checks help keep patient records consistent.</p>
           </div>
         </div>
         <div class="panel-body">
@@ -163,11 +160,6 @@ try {
             </div>
             <button class="button primary full" type="submit">Create Patient Record</button>
           </form>
-          <div class="tag-row" style="margin-top: 16px;">
-            <span class="tag green">Required Fields</span>
-            <span class="tag">Format Checks</span>
-            <span class="tag amber">Record Quality</span>
-          </div>
         </div>
       </aside>
     </section>

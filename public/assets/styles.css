@@ -283,7 +283,7 @@ h3 {
 .module-card {
   display: grid;
   gap: 12px;
-  min-height: 178px;
+  min-height: 112px;
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -292,6 +292,14 @@ h3 {
 
 .module-card:hover {
   border-color: rgba(37, 99, 235, 0.45);
+}
+
+.module-action {
+  display: inline-flex;
+  margin-top: 14px;
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .tag-row {

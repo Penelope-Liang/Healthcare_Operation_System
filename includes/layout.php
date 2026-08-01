@@ -18,7 +18,7 @@ function render_sidebar($activePage) {
     <div class="brand-mark">HC</div>
     <div>
       <p class="brand-title">Healthcare Ops</p>
-      <p class="brand-subtitle">COVID-19 workflow system</p>
+      <p class="brand-subtitle">Clinic Operations</p>
     </div>
   </div>
   <nav class="nav" aria-label="Primary navigation">
@@ -29,9 +29,6 @@ function render_sidebar($activePage) {
       </a>
     <?php endforeach; ?>
   </nav>
-  <div class="sidebar-note">
-    Manage patient records, vaccination logistics, clinic sites, and clinical staffing from one operations workspace.
-  </div>
 </aside>
 <?php
 }

@@ -67,8 +67,7 @@ if ($connection instanceof PDO) {
     <header class="page-header">
       <div>
         <p class="eyebrow">Vaccine Logistics</p>
-        <h1>Vaccine lots, manufacturers, dose counts, and clinic shipment links.</h1>
-        <p class="lead">The logistics view supports data consistency tests across vaccine inventory and clinic shipment relationships.</p>
+        <h1>Vaccines</h1>
       </div>
       <div class="header-actions">
         <a class="button" href="reports.php">Reports</a>
@@ -88,7 +87,6 @@ if ($connection instanceof PDO) {
         <div class="panel-header">
           <div>
             <h2>Vaccine Inventory</h2>
-            <p class="muted">Filter by lot number or manufacturer.</p>
           </div>
           <input type="search" placeholder="Filter inventory" data-table-filter="#vaccines-table" aria-label="Filter vaccine inventory">
         </div>
@@ -122,7 +120,6 @@ if ($connection instanceof PDO) {
         <div class="panel-header">
           <div>
             <h2>Add Vaccine Lot</h2>
-            <p class="muted">Create tracked inventory tied to an existing manufacturer.</p>
           </div>
         </div>
         <div class="panel-body">
@@ -163,8 +160,7 @@ if ($connection instanceof PDO) {
       <div class="panel">
         <div class="panel-header">
           <div>
-            <h2>Shipment Coverage</h2>
-            <p class="muted">Clinic assignment checks for each vaccine lot.</p>
+            <h2>Shipments</h2>
           </div>
         </div>
         <div class="panel-body">
@@ -186,11 +182,6 @@ if ($connection instanceof PDO) {
               <?php endforeach; ?>
             </tbody>
           </table>
-          <div class="tag-row" style="margin-top: 16px;">
-            <span class="tag green">Inventory Lookup</span>
-            <span class="tag">Foreign Key Coverage</span>
-            <span class="tag amber">Empty State Tests</span>
-          </div>
         </div>
       </div>
 
@@ -198,7 +189,6 @@ if ($connection instanceof PDO) {
         <div class="panel-header">
           <div>
             <h2>Assign Shipment</h2>
-            <p class="muted">Link an existing vaccine lot to a clinic.</p>
           </div>
         </div>
         <div class="panel-body">
