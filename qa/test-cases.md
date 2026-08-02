@@ -13,3 +13,9 @@
 | TC-009 | Workers | Worker assignment create form exists | Open Workers page | Role, credential, clinic fields, and submit button are visible | Playwright |
 | TC-010 | Reports | Vaccination record create form exists | Open Reports page | Patient, clinic, lot, date, time fields, and submit button are visible | Playwright |
 | TC-011 | Error Handling | Database unavailable state | Stop MySQL and open dashboard | Page renders with a database error notice instead of a blank screen | Playwright |
+| TC-012 | Patients | Required patient fields | Submit patient form with missing OHIP, first name, last name, or DOB | Browser validation blocks submission | Playwright |
+| TC-013 | Patients | Patient name boundary | Enter numbers in first or last name | Browser validation reports pattern mismatch | Playwright |
+| TC-014 | Vaccines | Vaccine dose boundary | Enter a negative dose count | Browser validation reports range underflow | Playwright |
+| TC-015 | Clinics | Required clinic fields | Submit clinic form with missing name or operating date | Browser validation blocks submission | Playwright |
+| TC-016 | Workers | Required worker assignment fields | Submit worker form with missing role, ID, credential, or clinic | Browser validation blocks submission | Playwright |
+| TC-017 | Reports | Required vaccination fields | Submit vaccination form with missing patient, clinic, lot, date, or time | Browser validation blocks submission | Playwright |

@@ -10,3 +10,4 @@
 | REQ-006 | Users can manage nurse and doctor assignments. | TC-009 | `tests/e2e/operations-create-forms.spec.js` |
 | REQ-007 | Users can manage vaccination records. | TC-010 | `tests/e2e/operations-create-forms.spec.js` |
 | REQ-008 | Pages show a usable error state when MySQL is unavailable. | TC-011 | `tests/e2e/error-handling.spec.js` |
+| REQ-009 | Required fields and boundary constraints block invalid form submissions. | TC-012, TC-013, TC-014, TC-015, TC-016, TC-017 | `tests/e2e/form-boundaries.spec.js` |
