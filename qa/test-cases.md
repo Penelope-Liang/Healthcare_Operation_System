@@ -24,5 +24,6 @@
 | TC-020 | Vaccines | Vaccine create/read persistence | Create a unique vaccine lot, filter inventory by lot | New lot appears in the table | Playwright DB |
 | TC-021 | Server Validation | Invalid direct POST is rejected | POST invalid vaccine date and negative dose directly to `vaccines.php` | Server returns validation notice before insert | Playwright DB |
 | TC-022 | API | API health check | GET `/api/health.php` | JSON response returns status and database state | Playwright API |
-| TC-023 | API | Patient API create/read | POST a unique patient to `/api/patients.php`, then GET patients | API returns 201 and patient appears in list | Playwright DB API |
+| TC-023 | API | Patient API CRUD | POST a unique patient, GET it by OHIP, PUT updated patient values, DELETE it, then GET again | API returns correct create/read/update/delete status codes and data | Playwright DB API |
 | TC-024 | API | Patient API validation | POST invalid patient JSON | API returns validation error | Playwright DB API |
+| TC-025 | CI/CD | Automated QA pipeline | Push or open a pull request | GitHub Actions installs dependencies, imports MySQL data, runs Jest, Playwright, DB/API tests, and uploads HTML report | GitHub Actions |

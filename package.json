@@ -8,7 +8,8 @@
     "test:unit": "jest",
     "test:e2e": "playwright test",
     "test:db": "DB_E2E=1 playwright test tests/e2e/database-write.spec.js",
-    "test:e2e:headed": "playwright test --headed"
+    "test:e2e:headed": "playwright test --headed",
+    "test:report": "playwright show-report"
   },
   "devDependencies": {
     "@playwright/test": "^1.46.0",

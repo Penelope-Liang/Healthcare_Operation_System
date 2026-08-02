@@ -14,4 +14,8 @@ function json_request_body() {
     }
     return $data;
 }
+
+function request_identifier($name) {
+    return trim($_GET[$name] ?? '');
+}
 ?>

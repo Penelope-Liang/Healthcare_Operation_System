@@ -14,7 +14,8 @@ Mobile iOS and Android automation are outside the current application scope beca
 - Verify searchable tables are connected to the table-filter behavior.
 - Verify pages render a usable error state when MySQL is unavailable.
 - Verify selected create flows persist records to MySQL and render them back in the UI.
-- Verify REST API health, patient create/read, and API validation behavior.
+- Verify REST API health, patient CRUD, and API validation behavior.
+- Verify GitHub Actions can run the QA checks and publish Playwright HTML report artifacts.
 
 ## Tools
 
@@ -22,6 +23,7 @@ Mobile iOS and Android automation are outside the current application scope beca
 - Playwright request testing for REST API checks.
 - Jest with jsdom for JavaScript behavior tests.
 - XAMPP PHP server and MySQL for local execution.
+- GitHub Actions for CI execution on push and pull request.
 
 ## Entry Criteria
 
@@ -37,3 +39,4 @@ Mobile iOS and Android automation are outside the current application scope beca
 - Table filtering tests pass.
 - Any failing test has a defect report or a documented product decision.
 - Database-backed create/read tests pass when MySQL is included in the test run.
+- CI uploads a Playwright HTML report artifact for review.

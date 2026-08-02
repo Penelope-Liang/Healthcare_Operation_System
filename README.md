@@ -13,7 +13,7 @@ The project was redesigned from a basic COVID-19 database interface into a clean
 - Worker assignment page for nurses and doctors across vaccination clinics with a form for creating worker assignments
 - Clinic directory with addresses, operating dates, linked vaccine shipments, and a form for creating clinic sites
 - Reports page with vaccination activity, staffing summaries, and a form for creating vaccination records
-- REST API endpoints for health checks and patient create/read workflows
+- REST API endpoints for health checks and patient CRUD workflows
 - Graceful database connection messaging when MySQL is not running
 
 ## Tech Stack
@@ -150,9 +150,10 @@ The repository includes JavaScript automation and QA documentation for the web a
 Automated coverage:
 
 - Playwright end-to-end tests for dashboard loading, navigation, patient validation, operations create forms, and database error handling
-- Playwright API tests for REST API health checks and database-backed patient create/read validation
+- Playwright API tests for REST API health checks and database-backed patient CRUD validation
 - Jest unit tests for browser table filtering behavior
 - QA documentation for test cases, defect reporting, traceability, platform scope, and AI-assisted test review
+- GitHub Actions workflow for PHP lint, Jest, Playwright, API, and database-backed test execution
 
 Install test dependencies:
 
@@ -184,7 +185,13 @@ Run database-backed create/read tests:
 npm run test:db
 ```
 
-`npm run test:db` requires XAMPP MySQL to be running with the `covidDB` database imported. These tests create unique patient, clinic, and vaccine records, verify records render back in the UI, and validate REST API patient create/read behavior.
+Open the latest Playwright HTML report:
+
+```bash
+npm run test:report
+```
+
+`npm run test:db` requires XAMPP MySQL to be running with the `covidDB` database imported. These tests create unique patient, clinic, and vaccine records, verify records render back in the UI, and validate REST API patient CRUD behavior.
 
 QA references:
 
@@ -192,6 +199,7 @@ QA references:
 - `qa/test-cases.md`
 - `qa/traceability-matrix.md`
 - `qa/bug-report-template.md`
+- `qa/sample-bug-reports.md`
 - `qa/ai-test-review-checklist.md`
 - `qa/platform-scope.md`
 

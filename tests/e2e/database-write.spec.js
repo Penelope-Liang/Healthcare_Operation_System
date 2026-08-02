@@ -1,9 +1,10 @@
 const { test, expect } = require("@playwright/test");
 
 test.describe("Database-backed create flows", () => {
-  test("creates a patient through the REST API and reads it back", async ({ request }) => {
+  test("supports patient CRUD through the REST API", async ({ request }) => {
     const digits = String(Date.now()).slice(-10);
     const ohip = `${digits.slice(0, 4)}-${digits.slice(4, 7)}-${digits.slice(7, 10)}`;
+    const patientUrl = `/api/patients.php?OHIP=${encodeURIComponent(ohip)}`;
 
     const createResponse = await request.post("/api/patients.php", {
       data: {
@@ -18,11 +19,40 @@ test.describe("Database-backed create flows", () => {
     expect(createResponse.status()).toBe(201);
     expect(createBody.patient.OHIP).toBe(ohip);
 
-    const listResponse = await request.get("/api/patients.php");
-    const listBody = await listResponse.json();
+    const readResponse = await request.get(patientUrl);
+    const readBody = await readResponse.json();
 
-    expect(listResponse.ok()).toBe(true);
-    expect(listBody.patients.some((patient) => patient.OHIP === ohip)).toBe(true);
+    expect(readResponse.ok()).toBe(true);
+    expect(readBody.patient.FirstName).toBe("Api");
+
+    const updateResponse = await request.put(patientUrl, {
+      data: {
+        FirstName: "Updated",
+        LastName: "Patient",
+        DOB: "1994-04-15"
+      }
+    });
+    const updateBody = await updateResponse.json();
+
+    expect(updateResponse.ok()).toBe(true);
+    expect(updateBody.patient.FirstName).toBe("Updated");
+    expect(updateBody.patient.DOB).toBe("1994-04-15");
+
+    const updatedReadResponse = await request.get(patientUrl);
+    const updatedReadBody = await updatedReadResponse.json();
+
+    expect(updatedReadResponse.ok()).toBe(true);
+    expect(updatedReadBody.patient.FirstName).toBe("Updated");
+
+    const deleteResponse = await request.delete(patientUrl);
+    const deleteBody = await deleteResponse.json();
+
+    expect(deleteResponse.ok()).toBe(true);
+    expect(deleteBody.message).toBe("Patient deleted successfully.");
+
+    const deletedReadResponse = await request.get(patientUrl);
+
+    expect(deletedReadResponse.status()).toBe(404);
   });
 
   test("rejects invalid patient payload through the REST API", async ({ request }) => {

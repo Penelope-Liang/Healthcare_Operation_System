@@ -13,4 +13,5 @@
 | REQ-009 | Required fields and boundary constraints block invalid form submissions. | TC-012, TC-013, TC-014, TC-015, TC-016, TC-017 | `tests/e2e/form-boundaries.spec.js` |
 | REQ-010 | Create actions persist valid records and render them back in the UI. | TC-018, TC-019, TC-020 | `tests/e2e/database-write.spec.js` |
 | REQ-011 | Server-side validation rejects invalid direct POST payloads. | TC-021 | `tests/e2e/database-write.spec.js` |
-| REQ-012 | REST API endpoints return JSON and support patient create/read validation. | TC-022, TC-023, TC-024 | `tests/e2e/api.spec.js`, `tests/e2e/database-write.spec.js` |
+| REQ-012 | REST API endpoints return JSON and support patient CRUD validation. | TC-022, TC-023, TC-024 | `tests/e2e/api.spec.js`, `tests/e2e/database-write.spec.js` |
+| REQ-013 | Automated QA checks run in CI and publish test evidence. | TC-025 | `.github/workflows/qa.yml`, `playwright-report/` artifact |
