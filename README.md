@@ -33,6 +33,13 @@ The project was redesigned from a basic COVID-19 database interface into a clean
 |-- includes/
 |   |-- connectdb.php
 |   `-- layout.php
+|-- qa/
+|   |-- ai-test-review-checklist.md
+|   |-- bug-report-template.md
+|   |-- platform-scope.md
+|   |-- test-cases.md
+|   |-- test-plan.md
+|   `-- traceability-matrix.md
 |-- public/
 |   |-- assets/
 |   |   |-- app.js
@@ -45,6 +52,12 @@ The project was redesigned from a basic COVID-19 database interface into a clean
 |   |-- reports.php
 |   |-- vaccines.php
 |   `-- workers.php
+|-- tests/
+|   |-- e2e/
+|   `-- unit/
+|-- jest.config.js
+|-- package.json
+|-- playwright.config.js
 
 ```
 
@@ -128,32 +141,49 @@ Users can review nurse and doctor assignments by vaccination clinic. Users can a
 
 Users can review overall system counts, vaccination schedule data, and clinical staffing summaries. Users can also create vaccination records by selecting an existing patient, clinic, and vaccine lot.
 
-## Automation Testing Roadmap
+## Automation and QA
 
-Automated testing is planned as a backend project quality layer, not as a user-facing website page.
+The repository includes JavaScript automation and QA documentation for the web application.
 
-Planned Playwright coverage:
+Automated coverage:
 
-- Dashboard smoke checks
-- Navigation checks across core pages
-- Patient form validation
-- Patient table filtering
-- Vaccine inventory rendering
-- Clinic shipment rendering
-- Worker assignment rendering
-- Unsafe input regression checks
+- Playwright end-to-end tests for dashboard loading, navigation, patient validation, operations create forms, and database error handling
+- Jest unit tests for browser table filtering behavior
+- QA documentation for test cases, defect reporting, traceability, platform scope, and AI-assisted test review
 
-Planned structure:
+Install test dependencies:
 
-```text
-tests/
-|-- dashboard.spec.js
-|-- patients.spec.js
-|-- vaccines.spec.js
-|-- workers.spec.js
-`-- security.spec.js
+```bash
+npm install
 ```
+
+Run unit tests:
+
+```bash
+npm run test:unit
+```
+
+Run end-to-end tests:
+
+```bash
+npm run test:e2e
+```
+
+Run all tests:
+
+```bash
+npm test
+```
+
+QA references:
+
+- `qa/test-plan.md`
+- `qa/test-cases.md`
+- `qa/traceability-matrix.md`
+- `qa/bug-report-template.md`
+- `qa/ai-test-review-checklist.md`
+- `qa/platform-scope.md`
 
 ## Current Status
 
-The main website UI has been redesigned and the database-backed pages are ready to run with XAMPP MySQL. Automated Playwright tests are the next implementation step.
+The main website UI has database-backed create forms for the core web modules, and the repository now includes Playwright, Jest, and QA documentation for web automation practice.
