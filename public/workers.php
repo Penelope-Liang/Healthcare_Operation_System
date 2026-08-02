@@ -2,6 +2,7 @@
 $dbOptional = true;
 include '../includes/connectdb.php';
 include '../includes/layout.php';
+include '../includes/validation.php';
 
 $nurses = [];
 $doctors = [];
@@ -10,49 +11,60 @@ $notice = null;
 $noticeType = 'success';
 if ($connection instanceof PDO) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_worker'])) {
-        $role = $_POST['Role'] ?? '';
+        $role = form_value('Role');
         try {
+            require_form_fields([
+                'Role' => 'Role',
+                'Id' => 'Worker ID',
+                'FirstName' => 'First name',
+                'LastName' => 'Last name',
+                'Credential' => 'Credential',
+                'VaxClinicName' => 'Clinic',
+            ]);
+            require_pattern(form_value('Id'), '/^[A-Za-z0-9]{1,5}$/', 'Worker ID must be 1 to 5 letters or numbers.');
+            require_pattern(form_value('FirstName'), '/^[A-Za-z]{1,15}$/', 'First name must contain letters only.');
+            require_pattern(form_value('LastName'), '/^[A-Za-z]{1,15}$/', 'Last name must contain letters only.');
             $connection->beginTransaction();
             if ($role === 'nurse') {
                 $stmt = $connection->prepare('INSERT INTO Nurse (Id, FirstName, LastName) VALUES (:id, :first, :last)');
                 $stmt->execute([
-                    ':id' => trim($_POST['Id'] ?? ''),
-                    ':first' => trim($_POST['FirstName'] ?? ''),
-                    ':last' => trim($_POST['LastName'] ?? ''),
+                    ':id' => form_value('Id'),
+                    ':first' => form_value('FirstName'),
+                    ':last' => form_value('LastName'),
                 ]);
                 $stmt = $connection->prepare('INSERT INTO NurseCreds (NurseId, NurseCredials) VALUES (:id, :credential)');
                 $stmt->execute([
-                    ':id' => trim($_POST['Id'] ?? ''),
-                    ':credential' => trim($_POST['Credential'] ?? ''),
+                    ':id' => form_value('Id'),
+                    ':credential' => form_value('Credential'),
                 ]);
                 $stmt = $connection->prepare('INSERT INTO NurseWork (VaxClinicName, NurseId) VALUES (:clinic, :id)');
                 $stmt->execute([
-                    ':clinic' => trim($_POST['VaxClinicName'] ?? ''),
-                    ':id' => trim($_POST['Id'] ?? ''),
+                    ':clinic' => form_value('VaxClinicName'),
+                    ':id' => form_value('Id'),
                 ]);
             } elseif ($role === 'doctor') {
                 $stmt = $connection->prepare('INSERT INTO Doctor (Id, FirstName, LastName) VALUES (:id, :first, :last)');
                 $stmt->execute([
-                    ':id' => trim($_POST['Id'] ?? ''),
-                    ':first' => trim($_POST['FirstName'] ?? ''),
-                    ':last' => trim($_POST['LastName'] ?? ''),
+                    ':id' => form_value('Id'),
+                    ':first' => form_value('FirstName'),
+                    ':last' => form_value('LastName'),
                 ]);
                 $stmt = $connection->prepare('INSERT INTO DoctorCreds (DoctorId, DoctorCredials) VALUES (:id, :credential)');
                 $stmt->execute([
-                    ':id' => trim($_POST['Id'] ?? ''),
-                    ':credential' => trim($_POST['Credential'] ?? ''),
+                    ':id' => form_value('Id'),
+                    ':credential' => form_value('Credential'),
                 ]);
                 $stmt = $connection->prepare('INSERT INTO DoctorWork (VaxClinicName, DoctorId) VALUES (:clinic, :id)');
                 $stmt->execute([
-                    ':clinic' => trim($_POST['VaxClinicName'] ?? ''),
-                    ':id' => trim($_POST['Id'] ?? ''),
+                    ':clinic' => form_value('VaxClinicName'),
+                    ':id' => form_value('Id'),
                 ]);
             } else {
                 throw new PDOException('Worker role is required.');
             }
             $connection->commit();
             $notice = 'Worker assignment created successfully.';
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
             if ($connection->inTransaction()) {
                 $connection->rollBack();
             }
@@ -194,15 +206,15 @@ if ($connection instanceof PDO) {
           </div>
           <div class="field">
             <label for="Id">Worker ID</label>
-            <input id="Id" name="Id" maxlength="5" required>
+            <input id="Id" name="Id" maxlength="5" pattern="[A-Za-z0-9]{1,5}" required>
           </div>
           <div class="field">
             <label for="FirstName">First Name</label>
-            <input id="FirstName" name="FirstName" maxlength="15" required>
+            <input id="FirstName" name="FirstName" maxlength="15" pattern="[A-Za-z]{1,15}" required>
           </div>
           <div class="field">
             <label for="LastName">Last Name</label>
-            <input id="LastName" name="LastName" maxlength="15" required>
+            <input id="LastName" name="LastName" maxlength="15" pattern="[A-Za-z]{1,15}" required>
           </div>
           <div class="field">
             <label for="Credential">Credential</label>

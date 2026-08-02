@@ -2,6 +2,7 @@
 $dbOptional = true;
 include '../includes/connectdb.php';
 include '../includes/layout.php';
+include '../includes/validation.php';
 
 $vaccines = [];
 $shipments = [];
@@ -13,24 +14,38 @@ if ($connection instanceof PDO) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             if (isset($_POST['create_vaccine'])) {
+                require_form_fields([
+                    'Lot' => 'Lot',
+                    'CompanyName' => 'Manufacturer',
+                    'Prodcution' => 'Production date',
+                    'Expiry' => 'Expiry date',
+                    'Doses' => 'Doses',
+                ]);
+                require_date_value(form_value('Prodcution'), 'Production date');
+                require_date_value(form_value('Expiry'), 'Expiry date');
+                require_min_integer(form_value('Doses'), 0, 'Doses');
                 $stmt = $connection->prepare('INSERT INTO Vaccine (Lot, CompanyName, Prodcution, Expiry, Doses) VALUES (:lot, :company, :production, :expiry, :doses)');
                 $stmt->execute([
-                    ':lot' => trim($_POST['Lot'] ?? ''),
-                    ':company' => trim($_POST['CompanyName'] ?? ''),
-                    ':production' => trim($_POST['Prodcution'] ?? ''),
-                    ':expiry' => trim($_POST['Expiry'] ?? ''),
-                    ':doses' => (int) ($_POST['Doses'] ?? 0),
+                    ':lot' => form_value('Lot'),
+                    ':company' => form_value('CompanyName'),
+                    ':production' => form_value('Prodcution'),
+                    ':expiry' => form_value('Expiry'),
+                    ':doses' => (int) form_value('Doses'),
                 ]);
                 $notice = 'Vaccine lot created successfully.';
             } elseif (isset($_POST['assign_shipment'])) {
+                require_form_fields([
+                    'Lots' => 'Lot',
+                    'Clinic' => 'Clinic',
+                ]);
                 $stmt = $connection->prepare('INSERT INTO ShipTo (Lots, Clinic) VALUES (:lot, :clinic)');
                 $stmt->execute([
-                    ':lot' => trim($_POST['Lots'] ?? ''),
-                    ':clinic' => trim($_POST['Clinic'] ?? ''),
+                    ':lot' => form_value('Lots'),
+                    ':clinic' => form_value('Clinic'),
                 ]);
                 $notice = 'Vaccine shipment assigned successfully.';
             }
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
             $notice = 'Unable to save vaccine data: ' . $e->getMessage();
             $noticeType = 'error';
         }
@@ -140,11 +155,11 @@ if ($connection instanceof PDO) {
             </div>
             <div class="field">
               <label for="Prodcution">Production</label>
-              <input id="Prodcution" name="Prodcution" placeholder="2026-08-01" maxlength="11" required>
+              <input id="Prodcution" type="date" name="Prodcution" required>
             </div>
             <div class="field">
               <label for="Expiry">Expiry</label>
-              <input id="Expiry" name="Expiry" placeholder="2027-08-01" maxlength="11" required>
+              <input id="Expiry" type="date" name="Expiry" required>
             </div>
             <div class="field full">
               <label for="Doses">Doses</label>

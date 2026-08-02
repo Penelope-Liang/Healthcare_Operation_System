@@ -19,3 +19,7 @@
 | TC-015 | Clinics | Required clinic fields | Submit clinic form with missing name or operating date | Browser validation blocks submission | Playwright |
 | TC-016 | Workers | Required worker assignment fields | Submit worker form with missing role, ID, credential, or clinic | Browser validation blocks submission | Playwright |
 | TC-017 | Reports | Required vaccination fields | Submit vaccination form with missing patient, clinic, lot, date, or time | Browser validation blocks submission | Playwright |
+| TC-018 | Patients | Patient create/read persistence | Create a unique patient, filter patient table by OHIP | New patient appears in the table | Playwright DB |
+| TC-019 | Clinics | Clinic create/read persistence | Create a unique clinic, filter clinic table by name | New clinic appears in the table | Playwright DB |
+| TC-020 | Vaccines | Vaccine create/read persistence | Create a unique vaccine lot, filter inventory by lot | New lot appears in the table | Playwright DB |
+| TC-021 | Server Validation | Invalid direct POST is rejected | POST invalid vaccine date and negative dose directly to `vaccines.php` | Server returns validation notice before insert | Playwright DB |

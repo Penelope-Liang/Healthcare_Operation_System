@@ -13,6 +13,7 @@ Mobile iOS, Android, and API automation are outside the current application scop
 - Verify operational create forms are present for patients, vaccines, clinics, workers, shipments, and vaccination records.
 - Verify searchable tables are connected to the table-filter behavior.
 - Verify pages render a usable error state when MySQL is unavailable.
+- Verify selected create flows persist records to MySQL and render them back in the UI.
 
 ## Tools
 
@@ -25,6 +26,7 @@ Mobile iOS, Android, and API automation are outside the current application scop
 - PHP files pass syntax checks.
 - The app can start from the `public/` web root.
 - MySQL is running when database-backed create scenarios are tested.
+- `covidDB` has been imported before running `npm run test:db`.
 
 ## Exit Criteria
 
@@ -32,3 +34,4 @@ Mobile iOS, Android, and API automation are outside the current application scop
 - Form validation tests pass.
 - Table filtering tests pass.
 - Any failing test has a defect report or a documented product decision.
+- Database-backed create/read tests pass when MySQL is included in the test run.

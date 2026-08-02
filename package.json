@@ -7,6 +7,7 @@
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "jest",
     "test:e2e": "playwright test",
+    "test:db": "DB_E2E=1 playwright test tests/e2e/database-write.spec.js",
     "test:e2e:headed": "playwright test --headed"
   },
   "devDependencies": {

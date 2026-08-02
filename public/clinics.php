@@ -2,6 +2,7 @@
 $dbOptional = true;
 include '../includes/connectdb.php';
 include '../includes/layout.php';
+include '../includes/validation.php';
 
 $clinics = [];
 $notice = null;
@@ -9,17 +10,26 @@ $noticeType = 'success';
 if ($connection instanceof PDO) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_clinic'])) {
         try {
+            require_form_fields([
+                'Name' => 'Clinic name',
+                'Street' => 'Street',
+                'City' => 'City',
+                'Prov' => 'Province',
+                'PC' => 'Postal code',
+                'date' => 'Operating date',
+            ]);
+            require_date_value(form_value('date'), 'Operating date');
             $stmt = $connection->prepare('INSERT INTO VaxClinic (Name, Street, City, Prov, PC, date) VALUES (:name, :street, :city, :prov, :pc, :date)');
             $stmt->execute([
-                ':name' => trim($_POST['Name'] ?? ''),
-                ':street' => trim($_POST['Street'] ?? ''),
-                ':city' => trim($_POST['City'] ?? ''),
-                ':prov' => trim($_POST['Prov'] ?? ''),
-                ':pc' => trim($_POST['PC'] ?? ''),
-                ':date' => trim($_POST['date'] ?? ''),
+                ':name' => form_value('Name'),
+                ':street' => form_value('Street'),
+                ':city' => form_value('City'),
+                ':prov' => form_value('Prov'),
+                ':pc' => form_value('PC'),
+                ':date' => form_value('date'),
             ]);
             $notice = 'Clinic created successfully.';
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
             $notice = 'Unable to create clinic: ' . $e->getMessage();
             $noticeType = 'error';
         }
@@ -134,7 +144,7 @@ if ($connection instanceof PDO) {
             </div>
             <div class="field">
               <label for="date">Operating Date</label>
-              <input id="date" name="date" placeholder="2026-08-01" maxlength="11" required>
+              <input id="date" type="date" name="date" required>
             </div>
             <button class="button primary full" type="submit">Create Clinic</button>
           </form>

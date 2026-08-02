@@ -11,3 +11,5 @@
 | REQ-007 | Users can manage vaccination records. | TC-010 | `tests/e2e/operations-create-forms.spec.js` |
 | REQ-008 | Pages show a usable error state when MySQL is unavailable. | TC-011 | `tests/e2e/error-handling.spec.js` |
 | REQ-009 | Required fields and boundary constraints block invalid form submissions. | TC-012, TC-013, TC-014, TC-015, TC-016, TC-017 | `tests/e2e/form-boundaries.spec.js` |
+| REQ-010 | Create actions persist valid records and render them back in the UI. | TC-018, TC-019, TC-020 | `tests/e2e/database-write.spec.js` |
+| REQ-011 | Server-side validation rejects invalid direct POST payloads. | TC-021 | `tests/e2e/database-write.spec.js` |

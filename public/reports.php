@@ -2,6 +2,7 @@
 $dbOptional = true;
 include '../includes/connectdb.php';
 include '../includes/layout.php';
+include '../includes/validation.php';
 
 $report = [
     'patients' => 0,
@@ -21,16 +22,25 @@ $noticeType = 'success';
 if ($connection instanceof PDO) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_vaccination'])) {
         try {
+            require_form_fields([
+                'OHIP' => 'Patient',
+                'ClinicName' => 'Clinic',
+                'Lots' => 'Vaccine lot',
+                'Date' => 'Date',
+                'Time' => 'Time',
+            ]);
+            require_date_value(form_value('Date'), 'Date');
+            require_time_value(form_value('Time'), 'Time');
             $stmt = $connection->prepare('INSERT INTO Vaccination (OHIP, ClinicName, Lots, Date, Time) VALUES (:ohip, :clinic, :lot, :date, :time)');
             $stmt->execute([
-                ':ohip' => trim($_POST['OHIP'] ?? ''),
-                ':clinic' => trim($_POST['ClinicName'] ?? ''),
-                ':lot' => trim($_POST['Lots'] ?? ''),
-                ':date' => trim($_POST['Date'] ?? ''),
-                ':time' => trim($_POST['Time'] ?? ''),
+                ':ohip' => form_value('OHIP'),
+                ':clinic' => form_value('ClinicName'),
+                ':lot' => form_value('Lots'),
+                ':date' => form_value('Date'),
+                ':time' => form_value('Time'),
             ]);
             $notice = 'Vaccination record created successfully.';
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
             $notice = 'Unable to create vaccination record: ' . $e->getMessage();
             $noticeType = 'error';
         }

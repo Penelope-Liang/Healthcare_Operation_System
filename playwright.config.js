@@ -4,6 +4,7 @@ const baseURL = process.env.BASE_URL || "http://localhost:8000";
 
 module.exports = defineConfig({
   testDir: "./tests/e2e",
+  testIgnore: process.env.DB_E2E ? [] : ["**/database-write.spec.js"],
   timeout: 30000,
   expect: {
     timeout: 5000

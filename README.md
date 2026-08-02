@@ -61,7 +61,7 @@ The project was redesigned from a basic COVID-19 database interface into a clean
 
 ```
 
-The `public/` directory is the web root. Shared PHP includes live in `includes/`, static browser assets live in `public/assets/`, database setup lives in `database/`, and legacy PHP pages live in `public/legacy/` for compatibility with the original project flow.
+The `public/` directory is the web root. Shared PHP includes live in `includes/`, static browser assets live in `public/assets/`, database setup lives in `database/`, and legacy PHP pages live in `public/legacy/` for reference only. Legacy page access is blocked by Apache `.htaccess`.
 
 ## Database Setup
 
@@ -174,6 +174,14 @@ Run all tests:
 ```bash
 npm test
 ```
+
+Run database-backed create/read tests:
+
+```bash
+npm run test:db
+```
+
+`npm run test:db` requires XAMPP MySQL to be running with the `covidDB` database imported. These tests create unique patient, clinic, and vaccine records, then verify the records render back in the UI.
 
 QA references:
 
