@@ -1,6 +1,45 @@
 const { test, expect } = require("@playwright/test");
 
 test.describe("Database-backed create flows", () => {
+  test("creates a patient through the REST API and reads it back", async ({ request }) => {
+    const digits = String(Date.now()).slice(-10);
+    const ohip = `${digits.slice(0, 4)}-${digits.slice(4, 7)}-${digits.slice(7, 10)}`;
+
+    const createResponse = await request.post("/api/patients.php", {
+      data: {
+        OHIP: ohip,
+        FirstName: "Api",
+        LastName: "Patient",
+        DOB: "1994-04-14"
+      }
+    });
+    const createBody = await createResponse.json();
+
+    expect(createResponse.status()).toBe(201);
+    expect(createBody.patient.OHIP).toBe(ohip);
+
+    const listResponse = await request.get("/api/patients.php");
+    const listBody = await listResponse.json();
+
+    expect(listResponse.ok()).toBe(true);
+    expect(listBody.patients.some((patient) => patient.OHIP === ohip)).toBe(true);
+  });
+
+  test("rejects invalid patient payload through the REST API", async ({ request }) => {
+    const response = await request.post("/api/patients.php", {
+      data: {
+        OHIP: "bad",
+        FirstName: "Api1",
+        LastName: "",
+        DOB: "not-a-date"
+      }
+    });
+    const body = await response.json();
+
+    expect(response.status()).toBe(422);
+    expect(body.error).toMatch(/Last name is required|OHIP must use/);
+  });
+
   test("rejects invalid direct POST data on the server", async ({ page }) => {
     const response = await page.request.post("/vaccines.php", {
       form: {

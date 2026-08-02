@@ -2,9 +2,9 @@
 
 ## Scope
 
-This project is a PHP/MySQL web application. Current automation scope is web UI validation with Playwright and JavaScript DOM behavior validation with Jest.
+This project is a PHP/MySQL web application with small REST-style JSON endpoints. Current automation scope is web UI validation with Playwright, REST API validation with Playwright request tests, and JavaScript DOM behavior validation with Jest.
 
-Mobile iOS, Android, and API automation are outside the current application scope because this repository does not contain mobile apps or API endpoints.
+Mobile iOS and Android automation are outside the current application scope because this repository does not contain mobile apps.
 
 ## Test Objectives
 
@@ -14,10 +14,12 @@ Mobile iOS, Android, and API automation are outside the current application scop
 - Verify searchable tables are connected to the table-filter behavior.
 - Verify pages render a usable error state when MySQL is unavailable.
 - Verify selected create flows persist records to MySQL and render them back in the UI.
+- Verify REST API health, patient create/read, and API validation behavior.
 
 ## Tools
 
 - Playwright for browser end-to-end tests.
+- Playwright request testing for REST API checks.
 - Jest with jsdom for JavaScript behavior tests.
 - XAMPP PHP server and MySQL for local execution.
 
