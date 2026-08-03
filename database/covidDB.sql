@@ -13,8 +13,8 @@ PRIMARY KEY(Name));
 CREATE TABLE Vaccine(
 Lot             VARCHAR(30)	NOT NULL,
 CompanyName     VARCHAR(30),
-Prodcution      CHAR(11),
-Expiry		CHAR(11),
+Prodcution      CHAR(15),
+Expiry		CHAR(15),
 Doses           INTEGER,
 PRIMARY KEY(Lot),
 FOREIGN KEY(CompanyName) REFERENCES Company(name));
@@ -26,7 +26,7 @@ Street          VARCHAR(30),
 City            VARCHAR(30),
 Prov            VARCHAR(30),
 PC              VARCHAR(30),
-date            CHAR(11),
+date            CHAR(15),
 PRIMARY KEY(Name));
 
 
@@ -59,7 +59,7 @@ CREATE TABLE Vaccination(
 OHIP            CHAR(12)     NOT NULL,
 ClinicName      VARCHAR(30)  NOT NULL,
 Lots            CHAR(6)      NOT NULL,
-Date	        CHAR(11)      NOT NULL,
+Date	        CHAR(15)      NOT NULL,
 Time            CHAR(5)      NOT NULL,
 PRIMARY KEY(OHIP),
 FOREIGN KEY(OHIP) REFERENCES Patient(OHIP),
@@ -112,7 +112,7 @@ FOREIGN KEY(DoctorId) REFERENCES Doctor(Id) on delete cascade);
 
 
 CREATE TABLE Practice(
-Name       VARCHAR(20)  NOT NULL, 
+Name       VARCHAR(40)  NOT NULL, 
 Phone		 CHAR(10),
 PRIMARY KEY(Name));
 
@@ -234,4 +234,3 @@ INSERT INTO Practice VALUES
 ("Hospital Based", 6132224434),
 ("Locum Tenens", 6132345423),
 ("Associations and Partnerships", 6132345423);
-
