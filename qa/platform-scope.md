@@ -17,7 +17,7 @@ This repository contains a web application only:
 - JavaScript unit tests with Jest and jsdom
 - QA artifacts for test cases, defect reporting, traceability, and AI-assisted test review
 - Database-backed create/read tests for selected web workflows
-- Database-backed REST API CRUD tests for patient records
+- Database-backed REST API CRUD tests for patients, clinics, vaccine lots, workers, shipments, and vaccination records
 - GitHub Actions pipeline for Jest, Playwright, API, and database-backed tests
 
 ## Not In Scope

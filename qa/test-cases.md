@@ -26,4 +26,5 @@
 | TC-022 | API | API health check | GET `/api/health.php` | JSON response returns status and database state | Playwright API |
 | TC-023 | API | Patient API CRUD | POST a unique patient, GET it by OHIP, PUT updated patient values, DELETE it, then GET again | API returns correct create/read/update/delete status codes and data | Playwright DB API |
 | TC-024 | API | Patient API validation | POST invalid patient JSON | API returns validation error | Playwright DB API |
-| TC-025 | CI/CD | Automated QA pipeline | Push or open a pull request | GitHub Actions installs dependencies, imports MySQL data, runs Jest, Playwright, DB/API tests, and uploads HTML report | GitHub Actions |
+| TC-025 | API | Resource API CRUD | Create, read, update, and delete clinics, vaccine lots, workers, and vaccination records; create/read/delete shipments | API returns correct status codes and persisted JSON data | Playwright DB API |
+| TC-026 | CI/CD | Automated QA pipeline | Push or open a pull request | GitHub Actions installs dependencies, imports MySQL data, runs Jest, Playwright, DB/API tests, and uploads HTML report | GitHub Actions |
