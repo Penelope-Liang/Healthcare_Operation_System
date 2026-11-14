@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${title} + ' · HealthOps'">HealthOps</title>
+  <link rel="icon" th:href="@{/favicon.svg}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <script th:src="@{/js/app.js}" defer></script>
+</head>
+<body>
+
+<aside th:fragment="sidebar(active)" class="sidebar">
+  <a class="brand" th:href="@{/}">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 32 32"><rect width="32" height="32" rx="9"/><path d="M13 8h6v5h5v6h-5v5h-6v-5H8v-6h5z"/></svg>
+    </span>
+    <span class="brand-text">
+      <strong>HealthOps</strong>
+      <small>Vaccination operations</small>
+    </span>
+  </a>
+
+  <nav class="nav" aria-label="Primary navigation">
+    <p class="nav-label">Overview</p>
+    <a th:href="@{/}" th:classappend="${active == 'dashboard'} ? 'active'" th:attr="aria-current=${active == 'dashboard'} ? 'page' : null">
+      <th:block th:replace="~{fragments/icons :: icon('dashboard')}"/><span>Dashboard</span></a>
+    <p class="nav-label">Care</p>
+    <a th:href="@{/patients}" th:classappend="${active == 'patients'} ? 'active'" th:attr="aria-current=${active == 'patients'} ? 'page' : null">
+      <th:block th:replace="~{fragments/icons :: icon('users')}"/><span>Patients</span></a>
+    <a th:href="@{/vaccinations}" th:classappend="${active == 'vaccinations'} ? 'active'" th:attr="aria-current=${active == 'vaccinations'} ? 'page' : null">
+      <th:block th:replace="~{fragments/icons :: icon('syringe')}"/><span>Vaccinations</span></a>
+    <p class="nav-label">Logistics</p>
+    <a th:href="@{/vaccines}" th:classappend="${active == 'vaccines'} ? 'active'" th:attr="aria-current=${active == 'vaccines'} ? 'page' : null">
+      <th:block th:replace="~{fragments/icons :: icon('package')}"/><span>Vaccine inventory</span></a>
+    <a th:href="@{/clinics}" th:classappend="${active == 'clinics'} ? 'active'" th:attr="aria-current=${active == 'clinics'} ? 'page' : null">
+      <th:block th:replace="~{fragments/icons :: icon('building')}"/><span>Clinics</span></a>
+    <a th:href="@{/staff}" th:classappend="${active == 'staff'} ? 'active'" th:attr="aria-current=${active == 'staff'} ? 'page' : null">
+      <th:block th:replace="~{fragments/icons :: icon('stethoscope')}"/><span>Clinical staff</span></a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a th:href="@{/api/health}" class="sidebar-api">
+      <th:block th:replace="~{fragments/icons :: icon('code')}"/><span>REST API status</span>
+    </a>
+  </div>
+</aside>
+
+<div th:fragment="toasts" class="toast-stack" aria-live="polite">
+  <div class="toast success" th:if="${toast}" role="status">
+    <th:block th:replace="~{fragments/icons :: icon('check')}"/>
+    <span th:text="${toast}">Saved.</span>
+    <button type="button" class="toast-close" aria-label="Dismiss" data-dismiss-toast>
+      <th:block th:replace="~{fragments/icons :: icon('x')}"/></button>
+  </div>
+  <div class="toast error" th:if="${toastError}" role="alert">
+    <th:block th:replace="~{fragments/icons :: icon('alert')}"/>
+    <span th:text="${toastError}">Something went wrong.</span>
+    <button type="button" class="toast-close" aria-label="Dismiss" data-dismiss-toast>
+      <th:block th:replace="~{fragments/icons :: icon('x')}"/></button>
+  </div>
+</div>
+
+<!-- Initials avatar; colour is picked from the name so it stays stable between visits. -->
+<span th:fragment="avatar(first, last)" class="avatar"
+      th:classappend="'tone-' + ${(#strings.length(first + last)) % 6}"
+      th:text="${#strings.toUpperCase(#strings.substring(first, 0, 1) + #strings.substring(last, 0, 1))}"
+      aria-hidden="true">AW</span>
+
+<!-- Search box that filters the rows of the element named by target. -->
+<label th:fragment="search(target, placeholder)" class="search">
+  <th:block th:replace="~{fragments/icons :: icon('search')}"/>
+  <input type="search" th:placeholder="${placeholder}" th:attr="data-table-filter=${target},aria-label=${placeholder}">
+</label>
+
+</body>
+</html>

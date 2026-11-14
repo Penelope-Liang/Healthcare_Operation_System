@@ -1,0 +1,28 @@
+# Default profile: connects to the MySQL database created by database/covidDB.sql.
+spring:
+  application:
+    name: healthops
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:covidDB}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:}
+    hikari:
+      # Fail fast when MySQL is down so pages can show a clear message instead of hanging.
+      connection-timeout: 3000
+      initialization-fail-timeout: -1
+  sql:
+    init:
+      mode: never
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: false
+
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: always
+
+logging:
+  level:
+    com.zaxxer.hikari: warn

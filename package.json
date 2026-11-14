@@ -2,12 +2,13 @@
   "name": "healthcare-operation-system",
   "version": "1.0.0",
   "private": true,
-  "description": "PHP and MySQL healthcare operations dashboard with JavaScript automation tests.",
+  "description": "Spring Boot healthcare operations dashboard - JavaScript unit and Playwright end-to-end tests.",
   "scripts": {
+    "build": "mvn -q -DskipTests package",
+    "start": "java -jar target/healthops.jar --spring.profiles.active=demo",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "jest",
     "test:e2e": "playwright test",
-    "test:db": "DB_E2E=1 playwright test tests/e2e/database-write.spec.js",
     "test:e2e:headed": "playwright test --headed",
     "test:report": "playwright show-report"
   },

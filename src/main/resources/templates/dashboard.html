@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<div class="app">
+  <aside th:replace="~{fragments/layout :: sidebar('dashboard')}"></aside>
+
+  <main class="main">
+    <div class="content" th:with="s=${summary}">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow" th:text="${#temporals.format(#temporals.createToday(), 'EEEE, MMMM d')}">Today</p>
+          <h1>Dashboard</h1>
+          <p class="subtitle">Vaccination coverage, inventory and staffing across every clinic.</p>
+        </div>
+        <div class="header-actions">
+          <a class="btn" th:href="@{/patients}">
+            <th:block th:replace="~{fragments/icons :: icon('users')}"/>View patients</a>
+          <a class="btn btn-primary" th:href="@{/vaccinations}">
+            <th:block th:replace="~{fragments/icons :: icon('syringe')}"/>Record vaccination</a>
+        </div>
+      </header>
+
+      <section class="grid grid-4" aria-label="Key metrics">
+        <article class="card kpi">
+          <div class="kpi-top">
+            <span class="kpi-label">Registered patients</span>
+            <span class="icon-bubble info"><th:block th:replace="~{fragments/icons :: icon('users')}"/></span>
+          </div>
+          <div class="kpi-value" th:text="${s.patients}">6</div>
+          <p class="kpi-foot"><span th:text="${s.patients - s.vaccinated}">0</span> awaiting a first dose</p>
+        </article>
+
+        <article class="card kpi">
+          <div class="kpi-top">
+            <span class="kpi-label">Vaccination coverage</span>
+            <span class="icon-bubble success"><th:block th:replace="~{fragments/icons :: icon('shield')}"/></span>
+          </div>
+          <div class="kpi-value"><th:block th:text="${s.coveragePercent}">100</th:block><small>%</small></div>
+          <div class="progress" role="progressbar" aria-label="Vaccination coverage"
+               th:attr="aria-valuenow=${s.coveragePercent}" aria-valuemin="0" aria-valuemax="100">
+            <span th:style="'width:' + ${s.coveragePercent} + '%'"></span>
+          </div>
+        </article>
+
+        <article class="card kpi">
+          <div class="kpi-top">
+            <span class="kpi-label">Clinic sites</span>
+            <span class="icon-bubble"><th:block th:replace="~{fragments/icons :: icon('building')}"/></span>
+          </div>
+          <div class="kpi-value" th:text="${s.clinics}">6</div>
+          <p class="kpi-foot"><span th:text="${s.vaccineLots}">6</span> vaccine lots in circulation</p>
+        </article>
+
+        <article class="card kpi">
+          <div class="kpi-top">
+            <span class="kpi-label">Clinical staff</span>
+            <span class="icon-bubble violet"><th:block th:replace="~{fragments/icons :: icon('stethoscope')}"/></span>
+          </div>
+          <div class="kpi-value" th:text="${s.staff}">12</div>
+          <p class="kpi-foot"><span th:text="${s.nurses}">6</span> nurses · <span th:text="${s.doctors}">6</span> doctors</p>
+        </article>
+      </section>
+
+      <section class="grid grid-main-side">
+        <article class="card">
+          <div class="card-header">
+            <div>
+              <h2>Recent vaccinations</h2>
+              <p>Latest doses administered across all clinics</p>
+            </div>
+            <a class="link-arrow" th:href="@{/vaccinations}">View all
+              <th:block th:replace="~{fragments/icons :: icon('arrow-right')}"/></a>
+          </div>
+          <div class="list">
+            <div class="list-row" th:each="v : ${s.recentVaccinations}">
+              <span th:replace="~{fragments/layout :: avatar(${v.firstName}, ${v.lastName})}"></span>
+              <div class="grow cell-stack">
+                <strong th:text="${v.patientName}">Amy White</strong>
+                <span class="sub" th:text="${v.clinicName}">Rexall</span>
+              </div>
+              <span class="badge info plain" th:text="${v.manufacturer}">Moderna</span>
+              <div class="meta cell-stack">
+                <span th:text="${@dates.pretty(v.date)}">Dec 21, 2021</span>
+                <span class="sub" th:text="${v.time}">10:00</span>
+              </div>
+            </div>
+            <div class="empty" th:if="${#lists.isEmpty(s.recentVaccinations)}">
+              <strong>No vaccinations yet</strong>Record the first dose from the Vaccinations page.
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-header">
+            <div>
+              <h2>Doses by manufacturer</h2>
+              <p>Current inventory</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="bars" th:with="max=${s.dosesByManufacturer.isEmpty() ? 1 : s.dosesByManufacturer[0].doses}">
+              <div class="bar-row" th:each="m : ${s.dosesByManufacturer}">
+                <div class="bar-head">
+                  <span th:text="${m.manufacturer}">Moderna</span>
+                  <span th:text="${m.doses} + ' doses'">6 doses</span>
+                </div>
+                <div class="progress">
+                  <span th:style="'width:' + ${max == 0 ? 0 : m.doses * 100 / max} + '%'"></span>
+                </div>
+              </div>
+            </div>
+            <div class="summary-line">
+              <span>Total doses in stock</span>
+              <strong th:text="${s.dosesInInventory}">12</strong>
+            </div>
+            <div style="margin-top: 16px">
+              <a class="link-arrow" th:href="@{/vaccines}">Manage inventory
+                <th:block th:replace="~{fragments/icons :: icon('arrow-right')}"/></a>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2>Clinic coverage</h2>
+            <p>Supply and staffing at each vaccination site</p>
+          </div>
+          <a class="link-arrow" th:href="@{/clinics}">All clinics
+            <th:block th:replace="~{fragments/icons :: icon('arrow-right')}"/></a>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+            <tr>
+              <th>Clinic</th>
+              <th>Vaccine lots</th>
+              <th class="num">Nurses</th>
+              <th class="num">Doctors</th>
+              <th class="num">Doses given</th>
+              <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${s.clinicCoverage}">
+              <td>
+                <div class="cell-stack">
+                  <strong th:text="${c.clinic.name}">Rexall</strong>
+                  <span class="sub" th:text="${c.clinic.city} + ', ' + ${c.clinic.prov}">Kingston, ON</span>
+                </div>
+              </td>
+              <td>
+                <div class="chips">
+                  <span class="chip" th:each="lot : ${c.lots}" th:text="${lot}">AB1234</span>
+                  <span class="cell-muted" th:if="${#lists.isEmpty(c.lots)}">None</span>
+                </div>
+              </td>
+              <td class="num" th:text="${c.nurses}">1</td>
+              <td class="num" th:text="${c.doctors}">1</td>
+              <td class="num" th:text="${c.vaccinations}">1</td>
+              <td>
+                <span th:if="${c.nurses > 0 and c.doctors > 0 and !#lists.isEmpty(c.lots)}" class="badge success">Ready</span>
+                <span th:if="${#lists.isEmpty(c.lots)}" class="badge warning">No supply</span>
+                <span th:if="${!#lists.isEmpty(c.lots) and (c.nurses == 0 or c.doctors == 0)}" class="badge danger">Understaffed</span>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+<div th:replace="~{fragments/layout :: toasts}"></div>
+</body>
+</html>

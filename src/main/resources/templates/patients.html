@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Patients')}"></head>
+<body>
+<div class="app">
+  <aside th:replace="~{fragments/layout :: sidebar('patients')}"></aside>
+
+  <main class="main">
+    <div class="content">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Care</p>
+          <h1>Patients</h1>
+          <p class="subtitle"
+             th:with="done=${#lists.size(patients.?[vaccinated])}"
+             th:text="${#lists.size(patients)} + ' registered · ' + ${done} + ' vaccinated'">6 registered</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-primary" type="button" data-open-dialog="#patient-dialog">
+            <th:block th:replace="~{fragments/icons :: icon('plus')}"/>Add patient</button>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2>Patient directory</h2>
+            <p>Search by name, OHIP, clinic or manufacturer</p>
+          </div>
+          <label th:replace="~{fragments/layout :: search('#patients-table', 'Search patients')}"></label>
+        </div>
+        <div class="table-wrap">
+          <table class="table" id="patients-table">
+            <thead>
+            <tr>
+              <th>Patient</th>
+              <th>Date of birth</th>
+              <th>Status</th>
+              <th>Vaccine</th>
+              <th>Clinic</th>
+              <th>Appointment</th>
+              <th class="actions"><span class="sr-only">Actions</span></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${patients}">
+              <td>
+                <div class="person">
+                  <span th:replace="~{fragments/layout :: avatar(${p.firstName}, ${p.lastName})}"></span>
+                  <div class="cell-stack">
+                    <strong th:text="${p.fullName}">Amy White</strong>
+                    <span class="sub mono" th:text="${p.ohip}">1029-293-345</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="cell-stack">
+                  <span th:text="${@dates.pretty(p.dob)}">Jan 23, 1990</span>
+                  <span class="sub" th:if="${@dates.age(p.dob) != null}" th:text="${@dates.age(p.dob)} + ' years'">35 years</span>
+                </div>
+              </td>
+              <td>
+                <span th:if="${p.vaccinated}" class="badge success">Vaccinated</span>
+                <span th:unless="${p.vaccinated}" class="badge warning">Not vaccinated</span>
+              </td>
+              <td>
+                <div class="cell-stack" th:if="${p.vaccinated}">
+                  <span th:text="${p.manufacturer}">Astrazeneca</span>
+                  <span class="sub mono" th:text="${p.lot}">AB1234</span>
+                </div>
+                <span class="cell-muted" th:unless="${p.vaccinated}">—</span>
+              </td>
+              <td th:text="${p.clinicName} ?: '—'" th:classappend="${p.clinicName == null} ? 'cell-muted'">Rexall</td>
+              <td>
+                <div class="cell-stack" th:if="${p.vaccinated}">
+                  <span th:text="${@dates.pretty(p.vaccinationDate)}">Dec 21, 2021</span>
+                  <span class="sub" th:text="${p.vaccinationTime}">10:00</span>
+                </div>
+                <a th:unless="${p.vaccinated}" class="link-arrow" th:href="@{/vaccinations}">Schedule
+                  <th:block th:replace="~{fragments/icons :: icon('arrow-right')}"/></a>
+              </td>
+              <td class="actions">
+                <form method="post" th:action="@{/patients/{ohip}/delete(ohip=${p.ohip})}"
+                      th:attr="data-confirm='Remove ' + ${p.fullName} + ' from the registry?'">
+                  <button class="btn btn-icon" type="submit" th:attr="aria-label='Delete ' + ${p.fullName}"
+                          th:title="'Delete ' + ${p.fullName}">
+                    <th:block th:replace="~{fragments/icons :: icon('trash')}"/></button>
+                </form>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+          <div class="empty" th:if="${#lists.isEmpty(patients)}">
+            <strong>No patients yet</strong>Add the first patient to get started.
+          </div>
+          <div class="empty" hidden data-filter-empty="#patients-table">
+            <strong>No matching patients</strong>Try a different name or OHIP number.
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<dialog class="modal" id="patient-dialog" aria-labelledby="patient-dialog-title"
+        th:attr="data-auto-open=${openDialog == 'patient-dialog'} ? 'true' : null">
+  <form method="post" th:action="@{/patients}" th:object="${patientForm}">
+    <div class="modal-header">
+      <div>
+        <h2 id="patient-dialog-title">Add patient</h2>
+        <p>Register a patient in the provincial vaccination registry.</p>
+      </div>
+      <button type="button" class="btn btn-icon" data-close-dialog aria-label="Close">
+        <th:block th:replace="~{fragments/icons :: icon('x')}"/></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field">
+          <label for="ohip">OHIP number</label>
+          <input th:field="*{ohip}" th:errorclass="invalid" placeholder="0000-000-000"
+                 pattern="[0-9]{4}-[0-9]{3}-[0-9]{3}" required>
+          <p class="field-error" th:if="${#fields.hasErrors('ohip')}" th:errors="*{ohip}"></p>
+        </div>
+        <div class="field">
+          <label for="spouseOhip">Spouse OHIP <span class="optional">(optional)</span></label>
+          <input th:field="*{spouseOhip}" th:errorclass="invalid" placeholder="0000-000-000"
+                 pattern="[0-9]{4}-[0-9]{3}-[0-9]{3}">
+          <p class="field-error" th:if="${#fields.hasErrors('spouseOhip')}" th:errors="*{spouseOhip}"></p>
+        </div>
+        <div class="field">
+          <label for="firstName">First name</label>
+          <input th:field="*{firstName}" th:errorclass="invalid" pattern="[A-Za-z]{1,30}" maxlength="30"
+                 autocomplete="off" required>
+          <p class="field-error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></p>
+        </div>
+        <div class="field">
+          <label for="lastName">Last name</label>
+          <input th:field="*{lastName}" th:errorclass="invalid" pattern="[A-Za-z]{1,30}" maxlength="30"
+                 autocomplete="off" required>
+          <p class="field-error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></p>
+        </div>
+        <div class="field full">
+          <label for="dob">Date of birth</label>
+          <input type="date" th:field="*{dob}" th:errorclass="invalid" required>
+          <p class="field-error" th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}"></p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn" data-close-dialog>Cancel</button>
+      <button type="submit" class="btn btn-primary">Create patient</button>
+    </div>
+  </form>
+</dialog>
+
+<div th:replace="~{fragments/layout :: toasts}"></div>
+</body>
+</html>

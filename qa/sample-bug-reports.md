@@ -8,13 +8,13 @@ These examples use a Jira-style defect format to show how issues would be docume
 
 - Browser: Chromium
 - OS: macOS
-- App URL: `/patients.php`
+- App URL: `/patients`
 - Database state: `covidDB` imported
 - Commit: local test build
 
 ## Steps to Reproduce
 
-1. Open `/patients.php`.
+1. Open `/patients`.
 2. Enter `123` in the OHIP field.
 3. Fill first name, last name, and date of birth with valid values.
 4. Submit the form.
@@ -42,13 +42,13 @@ High
 
 - Browser: Chromium
 - OS: macOS
-- App URL: `/vaccines.php`
+- App URL: `/vaccines`
 - Database state: `covidDB` imported
 - Commit: local test build
 
 ## Steps to Reproduce
 
-1. Open `/vaccines.php`.
+1. Open `/vaccines`.
 2. Enter a valid lot, manufacturer, production date, and expiry date.
 3. Enter `-1` in Doses.
 4. Submit the form.
@@ -63,7 +63,7 @@ The negative dose count is saved.
 
 ## Evidence
 
-- Related automated checks: `tests/e2e/form-boundaries.spec.js`, `tests/e2e/database-write.spec.js`
+- Related automated checks: `tests/e2e/form-boundaries.spec.js`, `ApiIntegrationTest`
 - Requirement: REQ-009
 
 ## Severity
@@ -76,14 +76,14 @@ High
 
 - Client: Playwright request API
 - OS: macOS
-- App URL: `/api/patients.php`
+- App URL: `/api/patients`
 - Database state: `covidDB` imported
 - Commit: local test build
 
 ## Steps to Reproduce
 
-1. Create a patient through `POST /api/patients.php`.
-2. Send `PUT /api/patients.php?OHIP={created-ohip}` with an empty `FirstName`.
+1. Create a patient through `POST /api/patients`.
+2. Send `PUT /api/patients/{created-ohip}` with an empty `firstName`.
 3. Check the API response.
 
 ## Expected Result
@@ -96,7 +96,7 @@ The API updates the patient with incomplete data.
 
 ## Evidence
 
-- Related automated check: `tests/e2e/database-write.spec.js`
+- Related automated check: `tests/e2e/api.spec.js`
 - Requirement: REQ-012
 
 ## Severity

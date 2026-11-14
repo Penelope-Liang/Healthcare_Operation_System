@@ -31,35 +31,38 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.2"
-          extensions: pdo_mysql
+      - name: Build and run JUnit / MockMvc tests
+        run: mvn -B verify
 
-      - name: Install dependencies
+      - name: Import MySQL database
+        run: mysql --protocol=tcp -h 127.0.0.1 -u root < database/covidDB.sql
+
+      - name: Install Node dependencies
         run: npm ci
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
-      - name: Lint PHP files
-        run: find public includes -name "*.php" -print0 | xargs -0 -n1 php -l
+      - name: Run Jest unit tests
+        run: npm run test:unit
 
-      - name: Import database
-        run: mysql --protocol=tcp -h 127.0.0.1 -u root < database/covidDB.sql
-
-      - name: Run Jest and Playwright smoke tests
-        run: npm test
-
-      - name: Run database-backed API and UI tests
-        run: npm run test:db
+      - name: Run Playwright UI and API tests against MySQL
+        run: npm run test:e2e
+        env:
+          SPRING_PROFILES_ACTIVE: default
 
       - name: Upload Playwright report
         if: always()
