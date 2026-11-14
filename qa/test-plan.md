@@ -2,7 +2,7 @@
 
 ## Scope
 
-This project is a PHP/MySQL web application with small REST-style JSON endpoints. Current automation scope is web UI validation with Playwright, REST API validation with Playwright request tests, and JavaScript DOM behavior validation with Jest.
+This project is a Java 21 / Spring Boot web application (Thymeleaf pages, JDBC, MySQL) with a JSON REST API. Current automation scope is web UI validation with Playwright, REST API validation with Playwright request tests, and JavaScript DOM behavior validation with Jest.
 
 Mobile iOS and Android automation are outside the current application scope because this repository does not contain mobile apps.
 
@@ -22,15 +22,15 @@ Mobile iOS and Android automation are outside the current application scope beca
 - Playwright for browser end-to-end tests.
 - Playwright request testing for REST API checks.
 - Jest with jsdom for JavaScript behavior tests.
-- XAMPP PHP server and MySQL for local execution.
+- JDK 21 + Maven, with MySQL or the in-memory H2 `demo` profile for local execution.
 - GitHub Actions for CI execution on push and pull request.
 
 ## Entry Criteria
 
-- PHP files pass syntax checks.
+- `mvn verify` passes (compilation plus JUnit/MockMvc integration tests).
 - The app can start from the `public/` web root.
 - MySQL is running when database-backed create scenarios are tested.
-- `covidDB` has been imported before running `npm run test:db`.
+- `covidDB` has been imported before running the end-to-end tests with `SPRING_PROFILES_ACTIVE=default` (not needed for the H2 `demo` profile).
 
 ## Exit Criteria
 

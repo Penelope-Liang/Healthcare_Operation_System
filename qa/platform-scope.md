@@ -4,7 +4,7 @@
 
 This repository contains a web application only:
 
-- PHP pages
+- Spring Boot + Thymeleaf pages
 - MySQL schema
 - Browser JavaScript
 - CSS

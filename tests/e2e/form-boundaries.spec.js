@@ -1,115 +1,85 @@
 const { test, expect } = require("@playwright/test");
 
-async function expectInvalidAfterSubmit(page, buttonName, locator, property) {
-  await page.getByRole("button", { name: buttonName }).click();
+async function openDialog(page, path, opener, dialogName) {
+  await page.goto(path);
+  await page.getByRole("button", { name: opener, exact: true }).first().click();
+  const dialog = page.getByRole("dialog", { name: dialogName });
+  await expect(dialog).toBeVisible();
+  return dialog;
+}
+
+async function expectInvalidAfterSubmit(dialog, buttonName, locator, property) {
+  await dialog.getByRole("button", { name: buttonName }).click();
   await expect(locator).toHaveJSProperty(property, true);
 }
 
 test.describe("Form boundary validation", () => {
   test("patient form enforces required fields and name pattern", async ({ page }) => {
-    await page.goto("/patients.php");
+    const dialog = await openDialog(page, "/patients", "Add patient", "Add patient");
 
-    await expectInvalidAfterSubmit(
-      page,
-      "Create Patient Record",
-      page.locator("#OHIP"),
-      "validity.valueMissing"
-    );
+    await expectInvalidAfterSubmit(dialog, "Create patient", dialog.getByLabel("OHIP number"), "validity.valueMissing");
 
-    await page.locator("#OHIP").fill("9999-888-777");
-    await expectInvalidAfterSubmit(
-      page,
-      "Create Patient Record",
-      page.locator("#FirstName"),
-      "validity.valueMissing"
-    );
+    await dialog.getByLabel("OHIP number").fill("9999-888-777");
+    await expectInvalidAfterSubmit(dialog, "Create patient", dialog.getByLabel("First name"), "validity.valueMissing");
 
-    await page.locator("#FirstName").fill("Jane1");
-    await expect(page.locator("#FirstName")).toHaveJSProperty("validity.patternMismatch", true);
+    await dialog.getByLabel("First name").fill("Jane1");
+    await expect(dialog.getByLabel("First name")).toHaveJSProperty("validity.patternMismatch", true);
 
-    await page.locator("#FirstName").fill("Jane");
-    await page.locator("#LastName").fill("Doe1");
-    await expect(page.locator("#LastName")).toHaveJSProperty("validity.patternMismatch", true);
+    await dialog.getByLabel("First name").fill("Jane");
+    await dialog.getByLabel("Last name").fill("Doe1");
+    await expect(dialog.getByLabel("Last name")).toHaveJSProperty("validity.patternMismatch", true);
   });
 
-  test("vaccine lot form blocks missing lot and negative dose count", async ({ page }) => {
-    await page.goto("/vaccines.php");
+  test("vaccine lot form blocks missing lot, long lot codes and negative doses", async ({ page }) => {
+    const dialog = await openDialog(page, "/vaccines", "Add lot", "Add vaccine lot");
 
-    await expectInvalidAfterSubmit(
-      page,
-      "Create Vaccine Lot",
-      page.locator("#Lot"),
-      "validity.valueMissing"
-    );
+    await expectInvalidAfterSubmit(dialog, "Create lot", dialog.getByLabel("Lot code"), "validity.valueMissing");
+    await expect(dialog.getByLabel("Lot code")).toHaveAttribute("maxlength", "6");
 
-    await page.locator("#Lot").fill("ZZ9999");
-    await page.locator("#Doses").fill("-1");
-    await expect(page.locator("#Doses")).toHaveJSProperty("validity.rangeUnderflow", true);
+    await dialog.getByLabel("Lot code").fill("ZZ99!");
+    await expect(dialog.getByLabel("Lot code")).toHaveJSProperty("validity.patternMismatch", true);
+
+    await dialog.getByLabel("Doses").fill("-1");
+    await expect(dialog.getByLabel("Doses")).toHaveJSProperty("validity.rangeUnderflow", true);
+  });
+
+  test("shipment form requires a lot and a clinic", async ({ page }) => {
+    const dialog = await openDialog(page, "/vaccines", "Assign shipment", "Assign shipment");
+    await expectInvalidAfterSubmit(dialog, "Assign shipment", dialog.getByLabel("Vaccine lot"), "validity.valueMissing");
+    await expect(dialog.getByLabel("Destination clinic")).toHaveJSProperty("validity.valueMissing", true);
   });
 
   test("clinic form requires address and operating date fields", async ({ page }) => {
-    await page.goto("/clinics.php");
+    const dialog = await openDialog(page, "/clinics", "Add clinic", "Add clinic");
 
-    await expectInvalidAfterSubmit(
-      page,
-      "Create Clinic",
-      page.locator("#Name"),
-      "validity.valueMissing"
-    );
+    await expectInvalidAfterSubmit(dialog, "Create clinic", dialog.getByLabel("Clinic name"), "validity.valueMissing");
 
-    await page.locator("#Name").fill("Boundary Clinic");
-    await page.locator("#Street").fill("100 Test St");
-    await page.locator("#City").fill("Kingston");
-    await page.locator("#Prov").fill("ON");
-    await page.locator("#PC").fill("K7L 1A1");
-    await expectInvalidAfterSubmit(
-      page,
-      "Create Clinic",
-      page.locator("#date"),
-      "validity.valueMissing"
-    );
+    await dialog.getByLabel("Clinic name").fill("Boundary Clinic");
+    await dialog.getByLabel("Street").fill("100 Test St");
+    await dialog.getByLabel("City").fill("Kingston");
+    await dialog.getByLabel("Province").fill("ON");
+    await dialog.getByLabel("Postal code").fill("K7L 1A1");
+    await expectInvalidAfterSubmit(dialog, "Create clinic", dialog.getByLabel("Operating date"), "validity.valueMissing");
   });
 
-  test("worker form requires role, worker identity, credential, and clinic", async ({ page }) => {
-    await page.goto("/workers.php");
+  test("staff form requires identity, credential and clinic", async ({ page }) => {
+    const dialog = await openDialog(page, "/staff", "Add staff member", "Add staff member");
 
-    await expectInvalidAfterSubmit(
-      page,
-      "Create Worker Assignment",
-      page.locator("#Role"),
-      "validity.valueMissing"
-    );
+    await expect(dialog.getByLabel("Role")).toHaveValue("nurse");
+    await expectInvalidAfterSubmit(dialog, "Save staff member", dialog.getByLabel("Staff ID"), "validity.valueMissing");
 
-    await page.locator("#Role").selectOption("nurse");
-    await expectInvalidAfterSubmit(
-      page,
-      "Create Worker Assignment",
-      page.locator("#Id"),
-      "validity.valueMissing"
-    );
-
-    await page.locator("#Id").fill("QA123");
-    await page.locator("#FirstName").fill("Nina");
-    await page.locator("#LastName").fill("Patel");
-    await expectInvalidAfterSubmit(
-      page,
-      "Create Worker Assignment",
-      page.locator("#Credential"),
-      "validity.valueMissing"
-    );
+    await dialog.getByLabel("Staff ID").fill("QA1234");
+    await expect(dialog.getByLabel("Staff ID")).toHaveValue("QA123");
+    await dialog.getByLabel("First name").fill("Nina");
+    await dialog.getByLabel("Last name").fill("Patel");
+    await expectInvalidAfterSubmit(dialog, "Save staff member", dialog.getByLabel("Credential"), "validity.valueMissing");
   });
 
-  test("vaccination record form requires patient, clinic, lot, date, and time", async ({ page }) => {
-    await page.goto("/reports.php");
+  test("vaccination form requires patient, clinic, lot, date and time", async ({ page }) => {
+    const dialog = await openDialog(page, "/vaccinations", "Record vaccination", "Record vaccination");
 
-    await expectInvalidAfterSubmit(
-      page,
-      "Create Vaccination Record",
-      page.locator("#OHIP"),
-      "validity.valueMissing"
-    );
-
-    await expect(page.locator("#Date")).toHaveJSProperty("validity.valueMissing", true);
-    await expect(page.locator("#Time")).toHaveJSProperty("validity.valueMissing", true);
+    await expectInvalidAfterSubmit(dialog, "Save vaccination", dialog.getByLabel("Patient"), "validity.valueMissing");
+    await expect(dialog.getByLabel("Date")).toHaveJSProperty("validity.valueMissing", true);
+    await expect(dialog.getByLabel("Time")).toHaveJSProperty("validity.valueMissing", true);
   });
 });

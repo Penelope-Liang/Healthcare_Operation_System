@@ -2,7 +2,7 @@
 
 | ID | Area | Scenario | Steps | Expected Result | Automation |
 | --- | --- | --- | --- | --- | --- |
-| TC-001 | Dashboard | Dashboard loads | Open `/covid.php` | Dashboard heading and module cards are visible | Playwright |
+| TC-001 | Dashboard | Dashboard loads | Open `/` | Dashboard heading and metric cards are visible | Playwright |
 | TC-002 | Navigation | Core navigation links work | Open dashboard, click Patients, then Reports | URL changes to the selected module | Playwright |
 | TC-003 | Patients | OHIP format validation | Enter `123` in OHIP and submit | Browser blocks submission for pattern mismatch | Playwright |
 | TC-004 | Patients | Patient table filter binding | Open Patients page | Filter input targets `#patients-table` | Playwright |
@@ -22,8 +22,8 @@
 | TC-018 | Patients | Patient create/read persistence | Create a unique patient, filter patient table by OHIP | New patient appears in the table | Playwright DB |
 | TC-019 | Clinics | Clinic create/read persistence | Create a unique clinic, filter clinic table by name | New clinic appears in the table | Playwright DB |
 | TC-020 | Vaccines | Vaccine create/read persistence | Create a unique vaccine lot, filter inventory by lot | New lot appears in the table | Playwright DB |
-| TC-021 | Server Validation | Invalid direct POST is rejected | POST invalid vaccine date and negative dose directly to `vaccines.php` | Server returns validation notice before insert | Playwright DB |
-| TC-022 | API | API health check | GET `/api/health.php` | JSON response returns status and database state | Playwright API |
+| TC-021 | Server Validation | Invalid direct POST is rejected | POST invalid vaccine date and negative dose directly to `/vaccines` | Server re-renders the form with field errors before insert | Playwright DB |
+| TC-022 | API | API health check | GET `/api/health` | JSON response returns status and database state | Playwright API |
 | TC-023 | API | Patient API CRUD | POST a unique patient, GET it by OHIP, PUT updated patient values, DELETE it, then GET again | API returns correct create/read/update/delete status codes and data | Playwright DB API |
 | TC-024 | API | Patient API validation | POST invalid patient JSON | API returns validation error | Playwright DB API |
 | TC-025 | API | Resource API CRUD | Create, read, update, and delete clinics, vaccine lots, workers, and vaccination records; create/read/delete shipments | API returns correct status codes and persisted JSON data | Playwright DB API |

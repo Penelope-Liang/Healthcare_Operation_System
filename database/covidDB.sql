@@ -118,7 +118,7 @@ PRIMARY KEY(Name));
 
 
 INSERT INTO Company VALUES
-("Astrazeneca","1004 Middlegate Rd", "Mississauga,", "ON" ,"L4Y 1M4"),
+("Astrazeneca","1004 Middlegate Rd", "Mississauga", "ON" ,"L4Y 1M4"),
 ("Johnson & Johnson", "88 McNabb St", "Markham", "ON", "L3R 5L2"),
 ("Moderna", "One Upland Rd", "Norwood", "MA", "02062"),
 ("Pfizer", "400 Webro Rd", "Parsippany", "NJ", "07054");
@@ -135,7 +135,7 @@ INSERT INTO Vaccine VALUES
 
 INSERT INTO VaxClinic VALUES
 ("Pharmasave Division Pharmacy", "472 Division St", "Kingston", "ON", "K7K 4B1", "01 JULY 2021"),
-("Rexall", " 240 Montreal St", "Kingston", "ON", "K7K 3G8", "17 JUNE 2021"),
+("Rexall", "240 Montreal St", "Kingston", "ON", "K7K 3G8", "17 JUNE 2021"),
 ("Shoppers Drug Mart", "445 Princess St", "Kingston", "ON", "K7L 1C3", "30 DEC 2021"),
 ("CATP Kingston", "7 Hickson Ave", "Kingston", "ON", "K7K 2N4", "03 JAN 2022"),
 ("Frontenac Medical Pharmacy", "789 Princess St", "Kingston", "ON", "K7L 1E9", "23 NOV 2021"),
@@ -153,10 +153,10 @@ INSERT INTO ShipTo VALUES
 
 INSERT INTO Patient VALUES
 ("1029-293-345", "2342-543-798", "Amy", "White", "1990-01-23"),
-("3424-091-654", "NULL", "John", "Smith", "1991-02-24"),
-("0903-434-120", "NULL", "Peter", "Lee", "1992-03-25"),
-("4523-123-787", "NULL", "Bob", "Hill", "2000-04-21"),
-("4323-898-432", "NULL", "Kitty", "Wood", "2012-11-11"),
+("3424-091-654", NULL, "John", "Smith", "1991-02-24"),
+("0903-434-120", NULL, "Peter", "Lee", "1992-03-25"),
+("4523-123-787", NULL, "Bob", "Hill", "2000-04-21"),
+("4323-898-432", NULL, "Kitty", "Wood", "2012-11-11"),
 ("4523-098-343", "8234-923-444", "Lucy", "Cooper", "1980-05-07");
 
 
