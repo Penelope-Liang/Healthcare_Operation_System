@@ -64,8 +64,7 @@ A **Spring Boot** REST API over MySQL powers a **Vue 3** single-page frontend; b
 |   `-- tests/                           Vitest unit + component tests
 |-- database/
 |   |-- schema.sql                       MySQL schema (also used by the H2 demo profile)
-|   |-- seed.sql                         sample data
-|   `-- migrate-from-covidDB.sql         one-off migration from the legacy schema
+|   `-- seed.sql                         sample data
 |-- tests/e2e/                           Playwright UI + API tests
 |-- qa/                                  test plan, cases, traceability, bug reports
 `-- pom.xml                              Maven build (also builds the frontend)
@@ -227,4 +226,3 @@ Design notes:
 
 - Dates and times use real `DATE` / `TIME` columns, and the database checks that doses are not negative and that a lot expires after it was produced.
 - Delete rules are explicit. Removing a lot or clinic also removes its shipments and staff assignments. Removing a patient also removes their spouse record. Patients, clinics and lots that appear in vaccination history cannot be deleted.
-- `database/migrate-from-covidDB.sql` moves data from the original `covidDB` schema into this one. It converts the text dates, merges the nurse and doctor tables, and cleans up the spouse data. It was checked by migrating the original sample data and comparing the result with `seed.sql` row by row.

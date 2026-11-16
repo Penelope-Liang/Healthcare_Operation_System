@@ -28,8 +28,8 @@ const sections = [
         <svg viewBox="0 0 32 32"><rect width="32" height="32" rx="9" /><path d="M13 8h6v5h5v6h-5v5h-6v-5H8v-6h5z" /></svg>
       </span>
       <span class="brand-text">
-        <strong>HealthOps</strong>
-        <small>Vaccination operations</small>
+        <strong>Healthcare Ops</strong>
+        <small>Operations dashboard</small>
       </span>
     </RouterLink>
 
