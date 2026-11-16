@@ -1,8 +1,7 @@
 package com.healthops.domain;
 
-public record Patient(String ohip, String spouseOhip, String firstName, String lastName, String dob) {
+import java.time.LocalDate;
 
-    public String fullName() {
-        return firstName + " " + lastName;
-    }
+/** A registered patient. {@code spouseOhip} comes from the spouse table and may be null. */
+public record Patient(String ohip, String firstName, String lastName, LocalDate dateOfBirth, String spouseOhip) {
 }

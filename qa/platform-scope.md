@@ -17,7 +17,7 @@ This repository contains a web application only:
 - Frontend unit tests with Vitest, jsdom and Vue Test Utils
 - QA artifacts for test cases, defect reporting, traceability, and AI-assisted test review
 - Database-backed create/read tests for selected web workflows
-- Database-backed REST API CRUD tests for patients, clinics, vaccine lots, workers, shipments, and vaccination records
+- Database-backed REST API CRUD tests for patients, clinics, vaccine lots, staff, shipments, and vaccination records
 - GitHub Actions pipeline for JUnit, Vitest, Playwright, API, and database-backed tests
 
 ## Not In Scope

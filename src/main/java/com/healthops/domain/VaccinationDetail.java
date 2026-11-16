@@ -1,17 +1,20 @@
 package com.healthops.domain;
 
-/** A vaccination record joined with patient and manufacturer names, for display. */
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+/** A dose with patient and manufacturer names; {@code doseNumber} counts the patient's doses in date order. */
 public record VaccinationDetail(
+        long id,
         String ohip,
         String firstName,
         String lastName,
         String clinicName,
         String lot,
         String manufacturer,
-        String date,
-        String time) {
-
-    public String patientName() {
-        return firstName + " " + lastName;
-    }
+        LocalDate date,
+        @JsonFormat(pattern = "HH:mm") LocalTime time,
+        int doseNumber) {
 }

@@ -35,7 +35,8 @@ class SpaAndOverviewTest {
         mvc.perform(get("/api/dashboard"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.patients").value(6))
-                .andExpect(jsonPath("$.vaccinated").value(6))
+                .andExpect(jsonPath("$.vaccinatedPatients").value(6))
+                .andExpect(jsonPath("$.dosesAdministered").value(6))
                 .andExpect(jsonPath("$.clinics").value(6))
                 .andExpect(jsonPath("$.nurses").value(6))
                 .andExpect(jsonPath("$.doctors").value(6))
@@ -50,8 +51,9 @@ class SpaAndOverviewTest {
     void patientOverviewJoinsVaccination() throws Exception {
         mvc.perform(get("/api/patients/overview"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.ohip == '1029-293-345')].manufacturer").value(hasItem("Astrazeneca")))
-                .andExpect(jsonPath("$[?(@.ohip == '1029-293-345')].clinicName").value(hasItem("Pharmasave Division Pharmacy")));
+                .andExpect(jsonPath("$[?(@.ohip == '1029-293-345')].lastManufacturer").value(hasItem("Astrazeneca")))
+                .andExpect(jsonPath("$[?(@.ohip == '1029-293-345')].lastClinicName").value(hasItem("Pharmasave Division Pharmacy")))
+                .andExpect(jsonPath("$[?(@.ohip == '1029-293-345')].spouseOhip").value(hasItem("2342-543-798")));
     }
 
     @Test
@@ -65,7 +67,8 @@ class SpaAndOverviewTest {
     void vaccinationDetailsAndCompanies() throws Exception {
         mvc.perform(get("/api/vaccinations/details"))
                 .andExpect(jsonPath("$", hasSize(6)))
-                .andExpect(jsonPath("$[0].firstName").value("Kitty"));
+                .andExpect(jsonPath("$[0].firstName").value("Kitty"))
+                .andExpect(jsonPath("$[0].doseNumber").value(1));
         mvc.perform(get("/api/companies"))
                 .andExpect(jsonPath("$[*].name", hasItem("Pfizer")));
     }

@@ -14,21 +14,21 @@ import { matchesQuery } from "@/lib/text";
 
 const toast = useToasts();
 const { data, loading, error, reload } = useResource(async () => {
-  const [vaccines, shipments, companies, clinics] = await Promise.all([
-    api.vaccines(), api.shipments(), api.companies(), api.clinics()
+  const [lots, shipments, companies, clinics] = await Promise.all([
+    api.vaccineLots(), api.shipments(), api.companies(), api.clinics()
   ]);
-  return { vaccines, shipments, companies, clinics };
-}, { vaccines: [], shipments: [], companies: [], clinics: [] });
+  return { lots, shipments, companies, clinics };
+}, { lots: [], shipments: [], companies: [], clinics: [] });
 
 const query = ref("");
-const visibleLots = computed(() => data.value.vaccines.filter((v) =>
-  matchesQuery(query.value, v.lot, v.companyName, prettyDate(v.expiry))));
-const totalDoses = computed(() => data.value.vaccines.reduce((sum, v) => sum + v.doses, 0));
-const expiredCount = computed(() => data.value.vaccines.filter((v) => isPast(v.expiry)).length);
+const visibleLots = computed(() => data.value.lots.filter((v) =>
+  matchesQuery(query.value, v.lot, v.manufacturer, prettyDate(v.expiryDate))));
+const totalDoses = computed(() => data.value.lots.reduce((sum, v) => sum + v.doses, 0));
+const expiredCount = computed(() => data.value.lots.filter((v) => isPast(v.expiryDate)).length);
 
 // New vaccine lot
 const lotDialogOpen = ref(false);
-const lotForm = useForm({ lot: "", companyName: "", production: "", expiry: "", doses: "" });
+const lotForm = useForm({ lot: "", manufacturer: "", productionDate: "", expiryDate: "", doses: "" });
 
 function openLotDialog() {
   lotForm.reset();
@@ -37,7 +37,7 @@ function openLotDialog() {
 
 async function createLot() {
   try {
-    const lot = await lotForm.submit((v) => api.createVaccine({ ...v, doses: v.doses === "" ? null : Number(v.doses) }));
+    const lot = await lotForm.submit((v) => api.createVaccineLot({ ...v, doses: v.doses === "" ? null : Number(v.doses) }));
     toast.success(`Lot ${lot.lot} was added to inventory.`);
     lotDialogOpen.value = false;
     reload();
@@ -49,7 +49,7 @@ async function createLot() {
 async function removeLot(v) {
   if (!window.confirm(`Remove lot ${v.lot} and its shipments?`)) return;
   try {
-    await api.deleteVaccine(v.lot);
+    await api.deleteVaccineLot(v.lot);
     toast.success(`Lot ${v.lot} was removed.`);
     reload();
   } catch (e) {
@@ -59,7 +59,7 @@ async function removeLot(v) {
 
 // Shipment
 const shipDialogOpen = ref(false);
-const shipForm = useForm({ lot: "", clinic: "" });
+const shipForm = useForm({ lot: "", clinicName: "" });
 
 function openShipDialog() {
   shipForm.reset();
@@ -69,7 +69,7 @@ function openShipDialog() {
 async function createShipment() {
   try {
     const s = await shipForm.submit((v) => api.createShipment(v));
-    toast.success(`Lot ${s.lot} is shipping to ${s.clinic}.`);
+    toast.success(`Lot ${s.lot} is shipping to ${s.clinicName}.`);
     shipDialogOpen.value = false;
     reload();
   } catch {
@@ -78,10 +78,10 @@ async function createShipment() {
 }
 
 async function removeShipment(s) {
-  if (!window.confirm(`Cancel the shipment of ${s.lot} to ${s.clinic}?`)) return;
+  if (!window.confirm(`Cancel the shipment of ${s.lot} to ${s.clinicName}?`)) return;
   try {
-    await api.deleteShipment(s.lot, s.clinic);
-    toast.success(`Shipment of ${s.lot} to ${s.clinic} was cancelled.`);
+    await api.deleteShipment(s.lot, s.clinicName);
+    toast.success(`Shipment of ${s.lot} to ${s.clinicName} was cancelled.`);
     reload();
   } catch (e) {
     toast.error(e.message);
@@ -107,7 +107,7 @@ async function removeShipment(s) {
       <section class="grid grid-4" aria-label="Inventory metrics">
         <article class="card kpi">
           <div class="kpi-top"><span class="kpi-label">Vaccine lots</span><span class="icon-bubble"><AppIcon name="package" /></span></div>
-          <div class="kpi-value">{{ data.vaccines.length }}</div>
+          <div class="kpi-value">{{ data.lots.length }}</div>
         </article>
         <article class="card kpi">
           <div class="kpi-top"><span class="kpi-label">Doses in stock</span><span class="icon-bubble info"><AppIcon name="syringe" /></span></div>
@@ -147,13 +147,13 @@ async function removeShipment(s) {
               <tbody>
                 <tr v-for="v in visibleLots" :key="v.lot">
                   <td><span class="chip">{{ v.lot }}</span></td>
-                  <td><strong>{{ v.companyName }}</strong></td>
-                  <td>{{ prettyDate(v.production) }}</td>
+                  <td><strong>{{ v.manufacturer }}</strong></td>
+                  <td>{{ prettyDate(v.productionDate) }}</td>
                   <td>
                     <div class="cell-stack">
-                      <span>{{ prettyDate(v.expiry) }}</span>
+                      <span>{{ prettyDate(v.expiryDate) }}</span>
                       <span>
-                        <span v-if="isPast(v.expiry)" class="badge danger">Expired</span>
+                        <span v-if="isPast(v.expiryDate)" class="badge danger">Expired</span>
                         <span v-else class="badge success">Usable</span>
                       </span>
                     </div>
@@ -168,7 +168,7 @@ async function removeShipment(s) {
                 </tr>
               </tbody>
             </table>
-            <div v-if="data.vaccines.length === 0" class="empty"><strong>No vaccine lots</strong>Add a lot to start tracking inventory.</div>
+            <div v-if="data.lots.length === 0" class="empty"><strong>No vaccine lots</strong>Add a lot to start tracking inventory.</div>
             <div v-else-if="visibleLots.length === 0" class="empty"><strong>No matching lots</strong></div>
           </div>
         </article>
@@ -181,13 +181,13 @@ async function removeShipment(s) {
             </div>
           </div>
           <div class="list">
-            <div v-for="s in data.shipments" :key="s.lot + '/' + s.clinic" class="list-row">
+            <div v-for="s in data.shipments" :key="s.lot + '/' + s.clinicName" class="list-row">
               <span class="icon-bubble violet"><AppIcon name="truck" /></span>
               <div class="grow cell-stack">
-                <strong>{{ s.clinic }}</strong>
-                <span class="sub"><span class="mono">{{ s.lot }}</span> · {{ s.companyName }}</span>
+                <strong>{{ s.clinicName }}</strong>
+                <span class="sub"><span class="mono">{{ s.lot }}</span> · {{ s.manufacturer }}</span>
               </div>
-              <button class="btn btn-icon" type="button" :aria-label="`Cancel shipment of ${s.lot} to ${s.clinic}`"
+              <button class="btn btn-icon" type="button" :aria-label="`Cancel shipment of ${s.lot} to ${s.clinicName}`"
                       title="Cancel shipment" @click="removeShipment(s)">
                 <AppIcon name="trash" />
               </button>
@@ -203,20 +203,20 @@ async function removeShipment(s) {
       <div class="form-grid">
         <FormField label="Lot code" for="lot" :error="lotForm.errors.lot">
           <input id="lot" v-model="lotForm.values.lot" :class="{ invalid: lotForm.errors.lot }" placeholder="AB1234"
-                 pattern="[A-Za-z0-9]{1,6}" maxlength="6" autocomplete="off" required>
+                 pattern="[A-Za-z0-9]{1,12}" maxlength="12" autocomplete="off" required>
         </FormField>
-        <FormField label="Manufacturer" for="companyName" :error="lotForm.errors.companyName">
-          <select id="companyName" v-model="lotForm.values.companyName" :class="{ invalid: lotForm.errors.companyName }" required>
+        <FormField label="Manufacturer" for="manufacturer" :error="lotForm.errors.manufacturer">
+          <select id="manufacturer" v-model="lotForm.values.manufacturer" :class="{ invalid: lotForm.errors.manufacturer }" required>
             <option value="">Select manufacturer</option>
             <option v-for="c in data.companies" :key="c.name" :value="c.name">{{ c.name }}</option>
           </select>
         </FormField>
-        <FormField label="Production date" for="production" :error="lotForm.errors.production">
-          <input id="production" v-model="lotForm.values.production" type="date" :class="{ invalid: lotForm.errors.production }" required>
+        <FormField label="Production date" for="productionDate" :error="lotForm.errors.productionDate">
+          <input id="productionDate" v-model="lotForm.values.productionDate" type="date" :class="{ invalid: lotForm.errors.productionDate }" required>
         </FormField>
-        <FormField label="Expiry date" for="expiry" :error="lotForm.errors.expiry || lotForm.errors.expiryAfterProduction">
-          <input id="expiry" v-model="lotForm.values.expiry" type="date"
-                 :class="{ invalid: lotForm.errors.expiry || lotForm.errors.expiryAfterProduction }" required>
+        <FormField label="Expiry date" for="expiryDate" :error="lotForm.errors.expiryDate || lotForm.errors.expiryAfterProduction">
+          <input id="expiryDate" v-model="lotForm.values.expiryDate" type="date"
+                 :class="{ invalid: lotForm.errors.expiryDate || lotForm.errors.expiryAfterProduction }" required>
         </FormField>
         <FormField label="Doses" for="doses" full :error="lotForm.errors.doses">
           <input id="doses" v-model="lotForm.values.doses" type="number" min="0" step="1" :class="{ invalid: lotForm.errors.doses }" required>
@@ -230,11 +230,11 @@ async function removeShipment(s) {
         <FormField label="Vaccine lot" for="shipment-lot" full :error="shipForm.errors.lot">
           <select id="shipment-lot" v-model="shipForm.values.lot" :class="{ invalid: shipForm.errors.lot }" required>
             <option value="">Select a lot</option>
-            <option v-for="v in data.vaccines" :key="v.lot" :value="v.lot">{{ v.lot }} · {{ v.companyName }}</option>
+            <option v-for="v in data.lots" :key="v.lot" :value="v.lot">{{ v.lot }} · {{ v.manufacturer }}</option>
           </select>
         </FormField>
-        <FormField label="Destination clinic" for="shipment-clinic" full :error="shipForm.errors.clinic">
-          <select id="shipment-clinic" v-model="shipForm.values.clinic" :class="{ invalid: shipForm.errors.clinic }" required>
+        <FormField label="Destination clinic" for="shipment-clinic" full :error="shipForm.errors.clinicName">
+          <select id="shipment-clinic" v-model="shipForm.values.clinicName" :class="{ invalid: shipForm.errors.clinicName }" required>
             <option value="">Select a clinic</option>
             <option v-for="c in data.clinics" :key="c.name" :value="c.name">{{ c.name }}</option>
           </select>

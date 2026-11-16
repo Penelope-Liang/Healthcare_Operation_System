@@ -50,12 +50,12 @@ export const api = {
 
   vaccinationDetails: () => request("GET", "/api/vaccinations/details"),
   createVaccination: (v) => request("POST", "/api/vaccinations", v),
-  deleteVaccination: (ohip) => request("DELETE", `/api/vaccinations/${enc(ohip)}`),
+  deleteVaccination: (id) => request("DELETE", `/api/vaccinations/${enc(id)}`),
 
-  vaccines: () => request("GET", "/api/vaccines"),
+  vaccineLots: () => request("GET", "/api/vaccines"),
   companies: () => request("GET", "/api/companies"),
-  createVaccine: (v) => request("POST", "/api/vaccines", v),
-  deleteVaccine: (lot) => request("DELETE", `/api/vaccines/${enc(lot)}`),
+  createVaccineLot: (v) => request("POST", "/api/vaccines", v),
+  deleteVaccineLot: (lot) => request("DELETE", `/api/vaccines/${enc(lot)}`),
 
   shipments: () => request("GET", "/api/shipments"),
   createShipment: (s) => request("POST", "/api/shipments", s),
@@ -66,7 +66,7 @@ export const api = {
   createClinic: (c) => request("POST", "/api/clinics", c),
   deleteClinic: (name) => request("DELETE", `/api/clinics/${enc(name)}`),
 
-  workers: () => request("GET", "/api/workers"),
-  createWorker: (w) => request("POST", "/api/workers", w),
-  deleteWorker: (role, id) => request("DELETE", `/api/workers/${enc(role)}/${enc(id)}`)
+  staff: () => request("GET", "/api/staff"),
+  createStaff: (m) => request("POST", "/api/staff", m),
+  deleteStaff: (id) => request("DELETE", `/api/staff/${enc(id)}`)
 };

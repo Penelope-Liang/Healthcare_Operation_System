@@ -17,10 +17,10 @@ const { data: clinics, loading, error, reload } = useResource(api.clinicOverview
 
 const query = ref("");
 const visible = computed(() => clinics.value.filter(({ clinic: c, lots }) =>
-  matchesQuery(query.value, c.name, c.city, c.street, c.pc, ...lots)));
+  matchesQuery(query.value, c.name, c.city, c.street, c.postalCode, ...lots)));
 
 const dialogOpen = ref(false);
-const form = useForm({ name: "", street: "", city: "", prov: "", pc: "", operatingDate: "" });
+const form = useForm({ name: "", street: "", city: "", province: "", postalCode: "", operatingDate: "" });
 
 function openDialog() {
   form.reset();
@@ -71,14 +71,14 @@ async function remove(c) {
             <div class="clinic-head">
               <div class="cell-stack">
                 <h3>{{ o.clinic.name }}</h3>
-                <span class="sub">{{ o.clinic.city }}, {{ o.clinic.prov }}</span>
+                <span class="sub">{{ o.clinic.city }}, {{ o.clinic.province }}</span>
               </div>
               <button class="btn btn-icon" type="button" :aria-label="`Delete ${o.clinic.name}`"
                       :title="`Delete ${o.clinic.name}`" @click="remove(o.clinic)">
                 <AppIcon name="trash" />
               </button>
             </div>
-            <p class="meta-line"><AppIcon name="pin" /><span>{{ o.clinic.street }}, {{ o.clinic.pc }}</span></p>
+            <p class="meta-line"><AppIcon name="pin" /><span>{{ o.clinic.street }}, {{ o.clinic.postalCode }}</span></p>
             <p class="meta-line"><AppIcon name="calendar" /><span>Operating {{ prettyDate(o.clinic.operatingDate) }}</span></p>
             <div class="chips">
               <span v-for="lot in o.lots" :key="lot" class="chip">{{ lot }}</span>
@@ -100,19 +100,19 @@ async function remove(c) {
                  submit-label="Create clinic" :busy="form.busy.value" :error="form.formError.value" @submit="create">
       <div class="form-grid">
         <FormField label="Clinic name" for="name" full :error="form.errors.name">
-          <input id="name" v-model="form.values.name" :class="{ invalid: form.errors.name }" maxlength="30" required>
+          <input id="name" v-model="form.values.name" :class="{ invalid: form.errors.name }" maxlength="50" required>
         </FormField>
         <FormField label="Street" for="street" full :error="form.errors.street">
-          <input id="street" v-model="form.values.street" :class="{ invalid: form.errors.street }" maxlength="30" required>
+          <input id="street" v-model="form.values.street" :class="{ invalid: form.errors.street }" maxlength="60" required>
         </FormField>
         <FormField label="City" for="city" :error="form.errors.city">
-          <input id="city" v-model="form.values.city" :class="{ invalid: form.errors.city }" maxlength="30" required>
+          <input id="city" v-model="form.values.city" :class="{ invalid: form.errors.city }" maxlength="40" required>
         </FormField>
-        <FormField label="Province" for="prov" :error="form.errors.prov">
-          <input id="prov" v-model="form.values.prov" :class="{ invalid: form.errors.prov }" maxlength="30" placeholder="ON" required>
+        <FormField label="Province" for="province" :error="form.errors.province">
+          <input id="province" v-model="form.values.province" :class="{ invalid: form.errors.province }" maxlength="30" placeholder="ON" required>
         </FormField>
-        <FormField label="Postal code" for="pc" :error="form.errors.pc">
-          <input id="pc" v-model="form.values.pc" :class="{ invalid: form.errors.pc }" maxlength="30" placeholder="K7L 1A1" required>
+        <FormField label="Postal code" for="postalCode" :error="form.errors.postalCode">
+          <input id="postalCode" v-model="form.values.postalCode" :class="{ invalid: form.errors.postalCode }" maxlength="10" placeholder="K7L 1A1" required>
         </FormField>
         <FormField label="Operating date" for="operatingDate" :error="form.errors.operatingDate">
           <input id="operatingDate" v-model="form.values.operatingDate" type="date" :class="{ invalid: form.errors.operatingDate }" required>

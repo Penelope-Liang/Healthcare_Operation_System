@@ -11,18 +11,18 @@ import { useResource } from "@/composables/useResource";
 import { useToasts } from "@/composables/useToasts";
 import { api } from "@/lib/api";
 import { ageInYears, prettyDate } from "@/lib/dates";
-import { fullName, matchesQuery } from "@/lib/text";
+import { fullName, matchesQuery, plural } from "@/lib/text";
 
 const toast = useToasts();
 const { data: patients, loading, error, reload } = useResource(api.patientOverview, []);
 
 const query = ref("");
 const visible = computed(() => patients.value.filter((p) =>
-  matchesQuery(query.value, fullName(p), p.ohip, p.clinicName, p.manufacturer, p.lot)));
-const vaccinatedCount = computed(() => patients.value.filter((p) => p.vaccinationDate).length);
+  matchesQuery(query.value, fullName(p), p.ohip, p.lastClinicName, p.lastManufacturer, p.lastLot)));
+const vaccinatedCount = computed(() => patients.value.filter((p) => p.doses > 0).length);
 
 const dialogOpen = ref(false);
-const form = useForm({ ohip: "", spouseOhip: "", firstName: "", lastName: "", dob: "" });
+const form = useForm({ ohip: "", firstName: "", lastName: "", dateOfBirth: "", spouseOhip: "" });
 
 function openDialog() {
   form.reset();
@@ -81,9 +81,9 @@ async function remove(p) {
                 <th>Patient</th>
                 <th>Date of birth</th>
                 <th>Status</th>
-                <th>Vaccine</th>
+                <th>Last vaccine</th>
                 <th>Clinic</th>
-                <th>Appointment</th>
+                <th>Last dose</th>
                 <th class="actions"><span class="sr-only">Actions</span></th>
               </tr>
             </thead>
@@ -100,26 +100,29 @@ async function remove(p) {
                 </td>
                 <td>
                   <div class="cell-stack">
-                    <span>{{ prettyDate(p.dob) }}</span>
-                    <span v-if="ageInYears(p.dob) !== null" class="sub">{{ ageInYears(p.dob) }} years</span>
+                    <span>{{ prettyDate(p.dateOfBirth) }}</span>
+                    <span v-if="ageInYears(p.dateOfBirth) !== null" class="sub">{{ ageInYears(p.dateOfBirth) }} years</span>
                   </div>
                 </td>
                 <td>
-                  <span v-if="p.vaccinationDate" class="badge success">Vaccinated</span>
+                  <div v-if="p.doses > 0" class="cell-stack">
+                    <span><span class="badge success">Vaccinated</span></span>
+                    <span class="sub">{{ plural(p.doses, "dose") }}</span>
+                  </div>
                   <span v-else class="badge warning">Not vaccinated</span>
                 </td>
                 <td>
-                  <div v-if="p.vaccinationDate" class="cell-stack">
-                    <span>{{ p.manufacturer }}</span>
-                    <span class="sub mono">{{ p.lot }}</span>
+                  <div v-if="p.doses > 0" class="cell-stack">
+                    <span>{{ p.lastManufacturer }}</span>
+                    <span class="sub mono">{{ p.lastLot }}</span>
                   </div>
                   <span v-else class="cell-muted">—</span>
                 </td>
-                <td :class="{ 'cell-muted': !p.clinicName }">{{ p.clinicName ?? "—" }}</td>
+                <td :class="{ 'cell-muted': !p.lastClinicName }">{{ p.lastClinicName ?? "—" }}</td>
                 <td>
-                  <div v-if="p.vaccinationDate" class="cell-stack">
-                    <span>{{ prettyDate(p.vaccinationDate) }}</span>
-                    <span class="sub">{{ p.vaccinationTime }}</span>
+                  <div v-if="p.doses > 0" class="cell-stack">
+                    <span>{{ prettyDate(p.lastDoseDate) }}</span>
+                    <span class="sub">{{ p.lastDoseTime }}</span>
                   </div>
                   <RouterLink v-else class="link-arrow" to="/vaccinations">Schedule <AppIcon name="arrow-right" /></RouterLink>
                 </td>
@@ -148,20 +151,20 @@ async function remove(p) {
           <input id="ohip" v-model="form.values.ohip" :class="{ invalid: form.errors.ohip }" placeholder="0000-000-000"
                  pattern="[0-9]{4}-[0-9]{3}-[0-9]{3}" required>
         </FormField>
-        <FormField label="Spouse OHIP" for="spouseOhip" optional :error="form.errors.spouseOhip">
-          <input id="spouseOhip" v-model="form.values.spouseOhip" :class="{ invalid: form.errors.spouseOhip }"
+        <FormField label="Spouse OHIP" for="spouseOhip" optional :error="form.errors.spouseOhip || form.errors.spouseDifferent">
+          <input id="spouseOhip" v-model="form.values.spouseOhip" :class="{ invalid: form.errors.spouseOhip || form.errors.spouseDifferent }"
                  placeholder="0000-000-000" pattern="[0-9]{4}-[0-9]{3}-[0-9]{3}">
         </FormField>
         <FormField label="First name" for="firstName" :error="form.errors.firstName">
           <input id="firstName" v-model="form.values.firstName" :class="{ invalid: form.errors.firstName }"
-                 pattern="[A-Za-z]{1,30}" maxlength="30" autocomplete="off" required>
+                 pattern="[A-Za-z][A-Za-z' \-]{0,29}" maxlength="30" autocomplete="off" required>
         </FormField>
         <FormField label="Last name" for="lastName" :error="form.errors.lastName">
           <input id="lastName" v-model="form.values.lastName" :class="{ invalid: form.errors.lastName }"
-                 pattern="[A-Za-z]{1,30}" maxlength="30" autocomplete="off" required>
+                 pattern="[A-Za-z][A-Za-z' \-]{0,29}" maxlength="30" autocomplete="off" required>
         </FormField>
-        <FormField label="Date of birth" for="dob" full :error="form.errors.dob">
-          <input id="dob" v-model="form.values.dob" type="date" :class="{ invalid: form.errors.dob }" required>
+        <FormField label="Date of birth" for="dateOfBirth" full :error="form.errors.dateOfBirth">
+          <input id="dateOfBirth" v-model="form.values.dateOfBirth" type="date" :class="{ invalid: form.errors.dateOfBirth }" required>
         </FormField>
       </div>
     </ModalDialog>

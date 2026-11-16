@@ -4,15 +4,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.healthops.domain.Vaccination;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 public class VaccinationForm {
-
-    private static final DateTimeFormatter HH_MM = DateTimeFormatter.ofPattern("HH:mm");
 
     @NotBlank(message = "Patient is required.")
     private String ohip;
@@ -24,16 +20,14 @@ public class VaccinationForm {
     private String lot;
 
     @NotNull(message = "Date is required.")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate date;
 
     @NotNull(message = "Time is required.")
-    @DateTimeFormat(pattern = "HH:mm")
     @JsonFormat(pattern = "HH:mm")
     private LocalTime time;
 
-    public Vaccination toVaccination() {
-        return new Vaccination(ohip, clinicName, lot, date.toString(), time.format(HH_MM));
+    public Vaccination toVaccination(Long id) {
+        return new Vaccination(id, ohip, clinicName, lot, date, time);
     }
 
     public String getOhip() { return ohip; }

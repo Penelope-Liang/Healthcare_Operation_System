@@ -1,4 +1,7 @@
 package com.healthops.domain;
 
-public record Clinic(String name, String street, String city, String prov, String pc, String operatingDate) {
+import java.time.LocalDate;
+
+public record Clinic(String name, String street, String city, String province, String postalCode,
+                     LocalDate operatingDate) {
 }

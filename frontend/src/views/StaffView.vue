@@ -11,13 +11,13 @@ import { useForm } from "@/composables/useForm";
 import { useResource } from "@/composables/useResource";
 import { useToasts } from "@/composables/useToasts";
 import { api } from "@/lib/api";
-import { fullName, groupStaff, matchesQuery } from "@/lib/text";
+import { fullName, matchesQuery, splitList } from "@/lib/text";
 
 const route = useRoute();
 const toast = useToasts();
 const { data, loading, error, reload } = useResource(async () => {
-  const [workers, clinics] = await Promise.all([api.workers(), api.clinics()]);
-  return { staff: groupStaff(workers), clinics };
+  const [staff, clinics] = await Promise.all([api.staff(), api.clinics()]);
+  return { staff, clinics };
 }, { staff: [], clinics: [] });
 
 const roleFilter = computed(() => (["nurse", "doctor"].includes(route.query.role) ? route.query.role : "all"));
@@ -29,7 +29,7 @@ const counts = computed(() => ({
 const query = ref("");
 const visible = computed(() => data.value.staff.filter((m) =>
   (roleFilter.value === "all" || m.role === roleFilter.value)
-  && matchesQuery(query.value, fullName(m), m.id, m.credential, ...m.clinics)));
+  && matchesQuery(query.value, fullName(m), m.id, ...m.credentials, ...m.clinics)));
 
 const tabs = [
   { key: "all", label: "All", to: { path: "/staff" } },
@@ -38,7 +38,8 @@ const tabs = [
 ];
 
 const dialogOpen = ref(false);
-const form = useForm({ role: "nurse", id: "", firstName: "", lastName: "", credential: "", clinicName: "" });
+// The form edits credentials as "RN, BSN" text and one clinic; the API takes lists.
+const form = useForm({ role: "nurse", id: "", firstName: "", lastName: "", credentials: "", clinic: "" });
 
 function openDialog() {
   form.reset();
@@ -47,8 +48,9 @@ function openDialog() {
 
 async function create() {
   try {
-    const worker = await form.submit((values) => api.createWorker(values));
-    toast.success(`${fullName(worker)} was assigned to ${worker.clinicName}.`);
+    const member = await form.submit(({ clinic, credentials, ...rest }) =>
+      api.createStaff({ ...rest, credentials: splitList(credentials), clinics: clinic ? [clinic] : [] }));
+    toast.success(`${fullName(member)} was assigned to ${member.clinics[0]}.`);
     dialogOpen.value = false;
     reload();
   } catch {
@@ -59,7 +61,7 @@ async function create() {
 async function remove(m) {
   if (!window.confirm(`Remove ${fullName(m)} and all of their clinic assignments?`)) return;
   try {
-    await api.deleteWorker(m.role, m.id);
+    await api.deleteStaff(m.id);
     toast.success(`Staff member ${m.id} was removed.`);
     reload();
   } catch (e) {
@@ -98,13 +100,13 @@ async function remove(m) {
               <tr>
                 <th>Name</th>
                 <th>Role</th>
-                <th>Credential</th>
+                <th>Credentials</th>
                 <th>Clinics</th>
                 <th class="actions"><span class="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="m in visible" :key="m.role + '/' + m.id">
+              <tr v-for="m in visible" :key="m.id">
                 <td>
                   <div class="person">
                     <PersonAvatar :first="m.firstName" :last="m.lastName" />
@@ -117,7 +119,11 @@ async function remove(m) {
                 <td>
                   <span class="badge" :class="m.role === 'nurse' ? 'info' : 'violet'">{{ m.role === "nurse" ? "Nurse" : "Doctor" }}</span>
                 </td>
-                <td><span class="chip">{{ m.credential ?? "—" }}</span></td>
+                <td>
+                  <div class="chips">
+                    <span v-for="c in m.credentials" :key="c" class="chip">{{ c }}</span>
+                  </div>
+                </td>
                 <td>
                   <div v-if="m.clinics.length" class="cell-stack">
                     <span v-for="clinic in m.clinics" :key="clinic">{{ clinic }}</span>
@@ -154,22 +160,18 @@ async function remove(m) {
         </FormField>
         <FormField label="First name" for="firstName" :error="form.errors.firstName">
           <input id="firstName" v-model="form.values.firstName" :class="{ invalid: form.errors.firstName }"
-                 pattern="[A-Za-z]{1,15}" maxlength="15" required>
+                 pattern="[A-Za-z][A-Za-z' \-]{0,29}" maxlength="30" required>
         </FormField>
         <FormField label="Last name" for="lastName" :error="form.errors.lastName">
           <input id="lastName" v-model="form.values.lastName" :class="{ invalid: form.errors.lastName }"
-                 pattern="[A-Za-z]{1,15}" maxlength="15" required>
+                 pattern="[A-Za-z][A-Za-z' \-]{0,29}" maxlength="30" required>
         </FormField>
-        <FormField label="Credential" for="credential" :error="form.errors.credential">
-          <input id="credential" v-model="form.values.credential" :class="{ invalid: form.errors.credential }"
-                 maxlength="20" list="credential-options" placeholder="RN, MD…" required>
-          <datalist id="credential-options">
-            <option value="RN" /><option value="BSN" /><option value="CCRN" />
-            <option value="MD" /><option value="DO" /><option value="PA" />
-          </datalist>
+        <FormField label="Credentials" for="credentials" :error="form.errors.credentials">
+          <input id="credentials" v-model="form.values.credentials" :class="{ invalid: form.errors.credentials }"
+                 maxlength="100" placeholder="RN, BSN" required>
         </FormField>
-        <FormField label="Clinic" for="clinicName" :error="form.errors.clinicName">
-          <select id="clinicName" v-model="form.values.clinicName" :class="{ invalid: form.errors.clinicName }" required>
+        <FormField label="Clinic" for="clinic" :error="form.errors.clinics">
+          <select id="clinic" v-model="form.values.clinic" :class="{ invalid: form.errors.clinics }" required>
             <option value="">Select a clinic</option>
             <option v-for="c in data.clinics" :key="c.name" :value="c.name">{{ c.name }}</option>
           </select>

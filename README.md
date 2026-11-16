@@ -62,7 +62,10 @@ A **Spring Boot** REST API over MySQL powers a **Vue 3** single-page frontend; b
 |   |   |-- router.js
 |   |   `-- App.vue
 |   `-- tests/                           Vitest unit + component tests
-|-- database/covidDB.sql                 MySQL schema + sample data
+|-- database/
+|   |-- schema.sql                       MySQL schema (also used by the H2 demo profile)
+|   |-- seed.sql                         sample data
+|   `-- migrate-from-covidDB.sql         one-off migration from the legacy schema
 |-- tests/e2e/                           Playwright UI + API tests
 |-- qa/                                  test plan, cases, traceability, bug reports
 `-- pom.xml                              Maven build (also builds the frontend)
@@ -84,14 +87,22 @@ java -jar target/healthops.jar --spring.profiles.active=demo
 ```
 
 Open http://localhost:8080. Demo mode uses an in-memory H2 database loaded with the same sample data as
-`database/covidDB.sql`. Changes are lost when the app stops.
+`database/seed.sql`. Changes are lost when the app stops.
 
 ### Option 2: MySQL
 
 Import the database:
 
 ```bash
-mysql -u root < database/covidDB.sql
+mysql -u root -e "CREATE DATABASE healthops"
+```
+
+```bash
+mysql -u root healthops < database/schema.sql
+```
+
+```bash
+mysql -u root healthops < database/seed.sql
 ```
 
 Start the app:
@@ -106,7 +117,7 @@ Connection settings come from environment variables:
 | --- | --- |
 | `DB_HOST` | `localhost` |
 | `DB_PORT` | `3306` |
-| `DB_NAME` | `covidDB` |
+| `DB_NAME` | `healthops` |
 | `DB_USER` | `root` |
 | `DB_PASSWORD` | *(empty)* |
 | `PORT` | `8080` |
@@ -139,14 +150,14 @@ All endpoints accept and return JSON. Dates use `YYYY-MM-DD` and times use `HH:M
 | Clinics | `GET/POST /api/clinics`, `GET/PUT/DELETE /api/clinics/{name}` |
 | Vaccine lots | `GET/POST /api/vaccines`, `GET/PUT/DELETE /api/vaccines/{lot}` |
 | Shipments | `GET/POST /api/shipments`, `GET/DELETE /api/shipments/{lot}/{clinic}` |
-| Vaccinations | `GET/POST /api/vaccinations`, `GET/PUT/DELETE /api/vaccinations/{ohip}` |
-| Staff | `GET /api/workers[?role=nurse\|doctor]`, `POST /api/workers`, `GET/PUT/DELETE /api/workers/{role}/{id}` |
+| Vaccinations | `GET/POST /api/vaccinations`, `GET/PUT/DELETE /api/vaccinations/{id}` |
+| Staff | `GET /api/staff[?role=nurse\|doctor]`, `POST /api/staff`, `GET/PUT/DELETE /api/staff/{id}` |
 
 Example:
 
 ```bash
 curl -X POST localhost:8080/api/patients -H 'Content-Type: application/json' \
-  -d '{"ohip":"1234-567-890","firstName":"Grace","lastName":"Hopper","dob":"1985-12-09"}'
+  -d '{"ohip":"1234-567-890","firstName":"Grace","lastName":"Hopper","dateOfBirth":"1985-12-09"}'
 ```
 
 Status codes: `201` created (with a `Location` header), `204` deleted, `400` malformed JSON,
@@ -195,11 +206,25 @@ This opens the latest Playwright HTML report.
 QA references: `qa/test-plan.md`, `qa/test-cases.md`, `qa/traceability-matrix.md`, `qa/bug-report-template.md`,
 `qa/sample-bug-reports.md`, `qa/ai-test-review-checklist.md`, `qa/platform-scope.md`.
 
-## Notes on the data model
+## Data model
 
-The schema in `database/covidDB.sql` is used as-is, so the app adapts to a few of its quirks:
+`database/schema.sql` defines ten tables:
 
-- Dates are stored as text in mixed formats (`2021-12-21`, `01 AUG 2022`). The UI parses all of them and shows one readable format.
-- `ShipTo.Lots` and `Vaccination.Lots` are `CHAR(6)`, so lot codes are limited to 6 letters or digits.
-- A doctor can be assigned to more than one clinic. The staff page lists each person once, with all of their clinics.
-- Each patient can have only one vaccination record (`Vaccination.OHIP` is the primary key), so the vaccination form only offers patients who don't have one yet.
+| Table | Purpose |
+| --- | --- |
+| `patient` | Patients, keyed by OHIP number |
+| `spouse` | At most one spouse per patient (the only place spouse data lives) |
+| `company` | Vaccine manufacturers |
+| `vaccine_lot` | Lots with production/expiry dates and dose counts |
+| `clinic` | Vaccination sites |
+| `shipment` | Which lots were delivered to which clinics |
+| `staff` | Nurses and doctors in one table, told apart by `role` |
+| `staff_credential` | Any number of credentials per staff member |
+| `staff_assignment` | Any number of clinic assignments per staff member |
+| `vaccination` | One row per dose, so patients can have second doses and boosters |
+
+Design notes:
+
+- Dates and times use real `DATE` / `TIME` columns, and the database checks that doses are not negative and that a lot expires after it was produced.
+- Delete rules are explicit. Removing a lot or clinic also removes its shipments and staff assignments. Removing a patient also removes their spouse record. Patients, clinics and lots that appear in vaccination history cannot be deleted.
+- `database/migrate-from-covidDB.sql` moves data from the original `covidDB` schema into this one. It converts the text dates, merges the nurse and doctor tables, and cleans up the spouse data. It was checked by migrating the original sample data and comparing the result with `seed.sql` row by row.

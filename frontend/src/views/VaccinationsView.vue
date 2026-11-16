@@ -11,25 +11,21 @@ import { useResource } from "@/composables/useResource";
 import { useToasts } from "@/composables/useToasts";
 import { api } from "@/lib/api";
 import { prettyDate } from "@/lib/dates";
-import { fullName, matchesQuery } from "@/lib/text";
+import { fullName, matchesQuery, plural } from "@/lib/text";
 
 const toast = useToasts();
 const { data, loading, error, reload } = useResource(async () => {
-  const [records, patients, clinics, vaccines] = await Promise.all([
-    api.vaccinationDetails(), api.patients(), api.clinics(), api.vaccines()
+  const [records, patients, clinics, lots] = await Promise.all([
+    api.vaccinationDetails(), api.patients(), api.clinics(), api.vaccineLots()
   ]);
-  return { records, patients, clinics, vaccines };
-}, { records: [], patients: [], clinics: [], vaccines: [] });
+  return { records, patients, clinics, lots };
+}, { records: [], patients: [], clinics: [], lots: [] });
 
 const query = ref("");
 const visible = computed(() => data.value.records.filter((v) =>
   matchesQuery(query.value, fullName(v), v.ohip, v.clinicName, v.manufacturer, v.lot)));
 
-// Vaccination.OHIP is the primary key, so each patient can have only one record.
-const eligiblePatients = computed(() => {
-  const done = new Set(data.value.records.map((v) => v.ohip));
-  return data.value.patients.filter((p) => !done.has(p.ohip));
-});
+const vaccinatedPatients = computed(() => new Set(data.value.records.map((v) => v.ohip)).size);
 
 const dialogOpen = ref(false);
 const form = useForm({ ohip: "", clinicName: "", lot: "", date: "", time: "" });
@@ -51,10 +47,10 @@ async function create() {
 }
 
 async function remove(v) {
-  if (!window.confirm(`Delete the vaccination record for ${fullName(v)}?`)) return;
+  if (!window.confirm(`Delete dose ${v.doseNumber} for ${fullName(v)}?`)) return;
   try {
-    await api.deleteVaccination(v.ohip);
-    toast.success(`Vaccination record for ${v.ohip} was removed.`);
+    await api.deleteVaccination(v.id);
+    toast.success(`Dose ${v.doseNumber} for ${fullName(v)} was removed.`);
     reload();
   } catch (e) {
     toast.error(e.message);
@@ -69,7 +65,7 @@ async function remove(v) {
         <p class="eyebrow">Care</p>
         <h1>Vaccinations</h1>
         <p class="subtitle">
-          {{ data.records.length }} doses administered · {{ eligiblePatients.length }} patients awaiting a dose
+          {{ plural(data.records.length, "dose") }} administered · {{ plural(vaccinatedPatients, "patient") }} vaccinated
         </p>
       </div>
       <div class="header-actions">
@@ -98,7 +94,7 @@ async function remove(v) {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="v in visible" :key="v.ohip">
+              <tr v-for="v in visible" :key="v.id">
                 <td>
                   <div class="person">
                     <PersonAvatar :first="v.firstName" :last="v.lastName" />
@@ -117,13 +113,13 @@ async function remove(v) {
                 <td>{{ v.clinicName }}</td>
                 <td>
                   <div class="cell-stack">
-                    <span>{{ v.manufacturer }}</span>
+                    <span>{{ v.manufacturer }} <span class="badge info plain">Dose {{ v.doseNumber }}</span></span>
                     <span class="sub mono">Lot {{ v.lot }}</span>
                   </div>
                 </td>
                 <td class="actions">
-                  <button class="btn btn-icon" type="button" :aria-label="`Delete record for ${fullName(v)}`"
-                          :title="`Delete record for ${fullName(v)}`" @click="remove(v)">
+                  <button class="btn btn-icon" type="button" :aria-label="`Delete dose ${v.doseNumber} for ${fullName(v)}`"
+                          :title="`Delete dose ${v.doseNumber} for ${fullName(v)}`" @click="remove(v)">
                     <AppIcon name="trash" />
                   </button>
                 </td>
@@ -140,16 +136,13 @@ async function remove(v) {
       </section>
     </LoadState>
 
-    <ModalDialog v-model:open="dialogOpen" title="Record vaccination" description="Each patient has one vaccination record."
+    <ModalDialog v-model:open="dialogOpen" title="Record vaccination" description="Log a dose — first doses, second doses and boosters alike."
                  submit-label="Save vaccination" :busy="form.busy.value" :error="form.formError.value" @submit="create">
-      <p v-if="eligiblePatients.length === 0" class="form-note spaced-bottom">
-        Every registered patient already has a vaccination record.
-      </p>
       <div class="form-grid">
         <FormField label="Patient" for="ohip" full :error="form.errors.ohip">
           <select id="ohip" v-model="form.values.ohip" :class="{ invalid: form.errors.ohip }" required>
             <option value="">Select a patient</option>
-            <option v-for="p in eligiblePatients" :key="p.ohip" :value="p.ohip">
+            <option v-for="p in data.patients" :key="p.ohip" :value="p.ohip">
               {{ p.lastName }}, {{ p.firstName }} · {{ p.ohip }}
             </option>
           </select>
@@ -163,7 +156,7 @@ async function remove(v) {
         <FormField label="Vaccine lot" for="lot" full :error="form.errors.lot">
           <select id="lot" v-model="form.values.lot" :class="{ invalid: form.errors.lot }" required>
             <option value="">Select a lot</option>
-            <option v-for="v in data.vaccines" :key="v.lot" :value="v.lot">{{ v.lot }} · {{ v.companyName }}</option>
+            <option v-for="l in data.lots" :key="l.lot" :value="l.lot">{{ l.lot }} · {{ l.manufacturer }}</option>
           </select>
         </FormField>
         <FormField label="Date" for="date" :error="form.errors.date">

@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /** With MySQL unreachable the app still starts and the API answers 503 (the Vue app shows a help card). */
 @SpringBootTest(properties = {
-        "spring.datasource.url=jdbc:mysql://127.0.0.1:1/covidDB?connectTimeout=500",
+        "spring.datasource.url=jdbc:mysql://127.0.0.1:1/healthops?connectTimeout=500",
         "spring.datasource.hikari.connection-timeout=500",
 })
 @AutoConfigureMockMvc

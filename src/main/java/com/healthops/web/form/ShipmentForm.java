@@ -8,10 +8,10 @@ public class ShipmentForm {
     private String lot;
 
     @NotBlank(message = "Clinic is required.")
-    private String clinic;
+    private String clinicName;
 
     public String getLot() { return lot; }
     public void setLot(String lot) { this.lot = lot; }
-    public String getClinic() { return clinic; }
-    public void setClinic(String clinic) { this.clinic = clinic; }
+    public String getClinicName() { return clinicName; }
+    public void setClinicName(String clinicName) { this.clinicName = clinicName; }
 }

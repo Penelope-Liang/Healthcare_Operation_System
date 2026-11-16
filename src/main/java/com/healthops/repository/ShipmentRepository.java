@@ -4,6 +4,8 @@ import com.healthops.domain.Shipment;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,8 +13,8 @@ import java.util.Optional;
 public class ShipmentRepository {
 
     private static final String SELECT = """
-            SELECT ShipTo.Lots, ShipTo.Clinic, Vaccine.CompanyName, Vaccine.Doses
-            FROM ShipTo JOIN Vaccine ON Vaccine.Lot = ShipTo.Lots
+            SELECT s.lot, s.clinic_name, l.manufacturer, l.doses
+            FROM shipment s JOIN vaccine_lot l ON l.lot = s.lot
             """;
 
     private final JdbcClient jdbc;
@@ -22,23 +24,23 @@ public class ShipmentRepository {
     }
 
     public List<Shipment> findAll() {
-        return jdbc.sql(SELECT + " ORDER BY ShipTo.Clinic, ShipTo.Lots").query(ShipmentRepository::map).list();
+        return jdbc.sql(SELECT + " ORDER BY s.clinic_name, s.lot").query(ShipmentRepository::map).list();
     }
 
-    public Optional<Shipment> find(String lot, String clinic) {
-        return jdbc.sql(SELECT + " WHERE ShipTo.Lots = ? AND ShipTo.Clinic = ?")
-                .params(lot, clinic).query(ShipmentRepository::map).optional();
+    public Optional<Shipment> find(String lot, String clinicName) {
+        return jdbc.sql(SELECT + " WHERE s.lot = ? AND s.clinic_name = ?")
+                .params(lot, clinicName).query(ShipmentRepository::map).optional();
     }
 
-    public void insert(String lot, String clinic) {
-        jdbc.sql("INSERT INTO ShipTo (Lots, Clinic) VALUES (?, ?)").params(lot, clinic).update();
+    public void insert(String lot, String clinicName) {
+        jdbc.sql("INSERT INTO shipment (lot, clinic_name) VALUES (?, ?)").params(lot, clinicName).update();
     }
 
-    public boolean delete(String lot, String clinic) {
-        return jdbc.sql("DELETE FROM ShipTo WHERE Lots = ? AND Clinic = ?").params(lot, clinic).update() > 0;
+    public boolean delete(String lot, String clinicName) {
+        return jdbc.sql("DELETE FROM shipment WHERE lot = ? AND clinic_name = ?").params(lot, clinicName).update() > 0;
     }
 
-    private static Shipment map(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException {
-        return new Shipment(rs.getString("Lots"), rs.getString("Clinic"), rs.getString("CompanyName"), rs.getInt("Doses"));
+    private static Shipment map(ResultSet rs, int rowNum) throws SQLException {
+        return new Shipment(rs.getString("lot"), rs.getString("clinic_name"), rs.getString("manufacturer"), rs.getInt("doses"));
     }
 }

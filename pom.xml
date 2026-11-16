@@ -63,6 +63,20 @@
 
     <build>
         <finalName>healthops</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- database/schema.sql and seed.sql are the single source of truth; the demo profile loads them into H2. -->
+            <resource>
+                <directory>database</directory>
+                <targetPath>db</targetPath>
+                <includes>
+                    <include>schema.sql</include>
+                    <include>seed.sql</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

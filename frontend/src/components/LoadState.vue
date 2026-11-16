@@ -15,7 +15,7 @@ defineEmits(["retry"]);
       <h2>Database is not connected</h2>
       <p>HealthOps couldn’t reach MySQL, so this page can’t load its records yet.</p>
       <ol>
-        <li>Start MySQL and import <code>database/covidDB.sql</code>.</li>
+        <li>Start MySQL and load <code>database/schema.sql</code> and <code>database/seed.sql</code>.</li>
         <li>Check the <code>DB_HOST</code>, <code>DB_USER</code> and <code>DB_PASSWORD</code> environment variables.</li>
         <li>Or run without MySQL: <code>mvn spring-boot:run -Dspring-boot.run.profiles=demo</code></li>
       </ol>

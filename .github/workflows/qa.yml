@@ -25,7 +25,7 @@ jobs:
       DB_HOST: 127.0.0.1
       DB_USER: root
       DB_PASSWORD: ""
-      DB_NAME: covidDB
+      DB_NAME: healthops
 
     steps:
       - name: Check out repository
@@ -53,8 +53,11 @@ jobs:
       - name: Run Vitest frontend unit tests
         run: npm --prefix frontend test
 
-      - name: Import MySQL database
-        run: mysql --protocol=tcp -h 127.0.0.1 -u root < database/covidDB.sql
+      - name: Create MySQL database from schema and seed data
+        run: |
+          mysql --protocol=tcp -h 127.0.0.1 -u root -e "CREATE DATABASE healthops"
+          mysql --protocol=tcp -h 127.0.0.1 -u root healthops < database/schema.sql
+          mysql --protocol=tcp -h 127.0.0.1 -u root healthops < database/seed.sql
 
       - name: Install Node dependencies
         run: npm ci
