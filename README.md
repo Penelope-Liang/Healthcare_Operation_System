@@ -1,8 +1,8 @@
 # HealthOps — Healthcare Operations Dashboard
 
-A Java / Spring Boot web application for running COVID-19 vaccination operations: patient registry,
+A full-stack web application for running COVID-19 vaccination operations: patient registry,
 vaccination records, vaccine lot inventory and shipments, clinic sites, and clinical staff assignments.
-It ships with a server-rendered dashboard UI and a JSON REST API over the same MySQL database.
+A **Spring Boot** REST API over MySQL powers a **Vue 3** single-page frontend; both ship together as one jar.
 
 ![Dashboard](docs/screenshots/dashboard.png)
 
@@ -20,7 +20,7 @@ It ships with a server-rendered dashboard UI and a JSON REST API over the same M
 - **Clinical staff**: nurses and doctors with credentials and clinic assignments, filterable by role
 - **REST API**: CRUD for every resource, with field-level validation errors and clear 404 / 409 responses
 - Responsive layout that becomes a top navigation bar on phones, automatic dark mode, and accessible dialogs, labels and focus states
-- When MySQL is down, pages show a friendly message and the API returns 503, instead of crashing
+- When MySQL is down, the API returns 503 and each page shows how to fix it, instead of crashing
 
 ## Tech stack
 
@@ -28,46 +28,59 @@ It ships with a server-rendered dashboard UI and a JSON REST API over the same M
 | --- | --- |
 | Language / runtime | Java 21 |
 | Framework | Spring Boot 3.3 (Spring MVC, Bean Validation) |
-| Views | Thymeleaf templates, hand-written CSS design system, vanilla JS |
+| Frontend | Vue 3 (Composition API, `<script setup>`), Vue Router, Vite, hand-written CSS design system |
 | Data access | Spring `JdbcClient` with plain SQL over the existing schema |
 | Database | MySQL 8 (production), H2 in MySQL mode (`demo` profile and tests) |
-| Tests | JUnit 5 + MockMvc, Playwright (UI + API), Jest |
+| Tests | JUnit 5 + MockMvc, Vitest + Vue Test Utils, Playwright (UI + API) |
 | CI | GitHub Actions with a MySQL service container |
 
 ## Project structure
 
 ```text
 .
-|-- database/covidDB.sql              MySQL schema + sample data
-|-- pom.xml
-|-- src/main/java/com/healthops/
-|   |-- config/                      input trimming for forms and JSON
-|   |-- domain/                      records: Patient, Clinic, Vaccine, Worker, ...
-|   |-- repository/                  SQL via JdbcClient, one class per aggregate
-|   `-- web/
-|       |-- api/                     REST controllers + JSON error handling
-|       |-- form/                    validated request/form objects
-|       `-- page/                    Thymeleaf page controllers
-|-- src/main/resources/
-|   |-- application.yml              MySQL settings (env-var driven)
-|   |-- application-demo.yml         in-memory H2 profile
-|   |-- db/                          H2 schema + seed data for the demo profile
-|   |-- static/                      css/app.css, js/app.js, favicon
-|   `-- templates/                   Thymeleaf pages + shared fragments
-|-- src/test/java/                   JUnit / MockMvc integration tests
-|-- tests/e2e/                       Playwright UI + API tests
-|-- tests/unit/                      Jest tests for app.js
-`-- qa/                              test plan, cases, traceability, bug reports
+|-- src/                                 Spring Boot backend (REST API only)
+|   |-- main/java/com/healthops/
+|   |   |-- config/                      JSON input trimming
+|   |   |-- domain/                      records: Patient, Clinic, Vaccine, Worker, ...
+|   |   |-- repository/                  SQL via JdbcClient, one class per aggregate
+|   |   `-- web/
+|   |       |-- api/                     REST controllers + JSON error handling
+|   |       |-- form/                    validated request objects (Bean Validation)
+|   |       `-- SpaController.java       serves index.html for Vue routes
+|   |-- main/resources/
+|   |   |-- application.yml              MySQL settings (env-var driven)
+|   |   |-- application-demo.yml         in-memory H2 profile
+|   |   `-- db/                          H2 schema + seed data for the demo profile
+|   `-- test/java/                       JUnit / MockMvc integration tests
+|-- frontend/                            Vue 3 + Vite single-page app
+|   |-- src/
+|   |   |-- views/                       one page per route (Dashboard, Patients, ...)
+|   |   |-- components/                  sidebar, dialog, form field, avatar, search, toasts
+|   |   |-- composables/                 useResource, useForm, useToasts
+|   |   |-- lib/                         API client, date and text helpers
+|   |   |-- assets/app.css               design system (light + dark)
+|   |   |-- router.js
+|   |   `-- App.vue
+|   `-- tests/                           Vitest unit + component tests
+|-- database/covidDB.sql                 MySQL schema + sample data
+|-- tests/e2e/                           Playwright UI + API tests
+|-- qa/                                  test plan, cases, traceability, bug reports
+`-- pom.xml                              Maven build (also builds the frontend)
 ```
 
 ## Running locally
 
-Requirements: **JDK 21** and **Maven 3.9+**. Node.js 20 is only needed for the JavaScript tests.
+Requirements: **JDK 21**, **Maven 3.9+** and **Node.js 20+**. `mvn package` runs `npm install` and `npm run build`
+in `frontend/` and bundles the result into the jar. Add `-DskipFrontend` to build only the Java side.
 
 ### Option 1: demo mode (no database to install)
 
 ```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=demo
+mvn package
+```
+
+```bash
+java -jar target/healthops.jar --spring.profiles.active=demo
 ```
 
 Open http://localhost:8080. Demo mode uses an in-memory H2 database loaded with the same sample data as
@@ -84,7 +97,7 @@ mysql -u root < database/covidDB.sql
 Start the app:
 
 ```bash
-mvn spring-boot:run
+java -jar target/healthops.jar
 ```
 
 Connection settings come from environment variables:
@@ -98,15 +111,21 @@ Connection settings come from environment variables:
 | `DB_PASSWORD` | *(empty)* |
 | `PORT` | `8080` |
 
-To build a runnable jar:
+### Frontend development (hot reload)
+
+Run the API in one terminal:
 
 ```bash
-mvn package
+mvn spring-boot:run -DskipFrontend -Dspring-boot.run.profiles=demo
 ```
 
+Run the Vite dev server in another:
+
 ```bash
-java -jar target/healthops.jar
+npm --prefix frontend run dev
 ```
+
+Open http://localhost:5173. Vite proxies `/api` to the Spring Boot app on port 8080, and edits to `.vue` files show up instantly.
 
 ## REST API
 
@@ -115,6 +134,7 @@ All endpoints accept and return JSON. Dates use `YYYY-MM-DD` and times use `HH:M
 | Resource | Endpoints |
 | --- | --- |
 | Health | `GET /api/health` |
+| Page views | `GET /api/dashboard`, `/api/patients/overview`, `/api/vaccinations/details`, `/api/clinics/overview`, `/api/companies` |
 | Patients | `GET/POST /api/patients`, `GET/PUT/DELETE /api/patients/{ohip}` |
 | Clinics | `GET/POST /api/clinics`, `GET/PUT/DELETE /api/clinics/{name}` |
 | Vaccine lots | `GET/POST /api/vaccines`, `GET/PUT/DELETE /api/vaccines/{lot}` |
@@ -147,7 +167,7 @@ A validation error looks like this:
 mvn verify
 ```
 
-This runs the JUnit + MockMvc tests: REST CRUD, validation, conflicts, page rendering, the post/redirect/get form flow,
+This runs the JUnit + MockMvc tests: REST CRUD, validation, conflicts, the overview endpoints, Vue route forwarding,
 and behavior when MySQL is down.
 
 ```bash
@@ -162,7 +182,7 @@ npm run build
 npm test
 ```
 
-`npm test` runs the Jest unit tests and the Playwright UI and API tests. Playwright starts the packaged jar in
+`npm test` runs the Vitest frontend tests and the Playwright UI and API tests. Playwright starts the packaged jar in
 `demo` mode automatically. To run the end-to-end tests against MySQL instead, set `SPRING_PROFILES_ACTIVE=default`
 (plus the `DB_*` variables if needed). To test an app that is already running, set `BASE_URL`.
 

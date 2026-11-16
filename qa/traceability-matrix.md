@@ -3,7 +3,7 @@
 | Requirement ID | Requirement | Test Case IDs | Automated Coverage |
 | --- | --- | --- | --- |
 | REQ-001 | Users can access dashboard metrics and module navigation. | TC-001, TC-002 | `tests/e2e/navigation.spec.js` |
-| REQ-002 | Users can view and search patient records. | TC-004, TC-005 | `tests/e2e/patients.spec.js`, `tests/unit/table-filter.test.js` |
+| REQ-002 | Users can view and search patient records. | TC-004, TC-005 | `tests/e2e/patients.spec.js`, `frontend/tests/text.test.js` |
 | REQ-003 | Patient creation blocks invalid OHIP values. | TC-003 | `tests/e2e/patients.spec.js` |
 | REQ-004 | Users can manage vaccine lots and shipments. | TC-006, TC-007 | `tests/e2e/form-boundaries.spec.js`, `ApiIntegrationTest` |
 | REQ-005 | Users can manage clinic sites. | TC-008 | `tests/e2e/form-boundaries.spec.js`, `PageIntegrationTest` |

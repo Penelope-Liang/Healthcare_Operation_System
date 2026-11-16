@@ -6,7 +6,7 @@
 | TC-002 | Navigation | Core navigation links work | Open dashboard, click Patients, then Reports | URL changes to the selected module | Playwright |
 | TC-003 | Patients | OHIP format validation | Enter `123` in OHIP and submit | Browser blocks submission for pattern mismatch | Playwright |
 | TC-004 | Patients | Patient table filter binding | Open Patients page | Filter input targets `#patients-table` | Playwright |
-| TC-005 | JavaScript | Table filter hides non-matching rows | Type a matching query into a filter input | Matching row stays visible; non-matching row is hidden | Jest |
+| TC-005 | JavaScript | Search matching hides non-matching rows | Type a matching query into a search box | Matching row stays visible; non-matching row is hidden | Vitest + Playwright |
 | TC-006 | Vaccines | Vaccine lot create form exists | Open Vaccines page | Add Vaccine Lot form and submit button are visible | Playwright |
 | TC-007 | Vaccines | Shipment assignment form exists | Open Vaccines page | Assign Shipment form and submit button are visible | Playwright |
 | TC-008 | Clinics | Clinic create form exists | Open Clinics page | Add Clinic form and submit button are visible | Playwright |
@@ -27,4 +27,4 @@
 | TC-023 | API | Patient API CRUD | POST a unique patient, GET it by OHIP, PUT updated patient values, DELETE it, then GET again | API returns correct create/read/update/delete status codes and data | Playwright DB API |
 | TC-024 | API | Patient API validation | POST invalid patient JSON | API returns validation error | Playwright DB API |
 | TC-025 | API | Resource API CRUD | Create, read, update, and delete clinics, vaccine lots, workers, and vaccination records; create/read/delete shipments | API returns correct status codes and persisted JSON data | Playwright DB API |
-| TC-026 | CI/CD | Automated QA pipeline | Push or open a pull request | GitHub Actions installs dependencies, imports MySQL data, runs Jest, Playwright, DB/API tests, and uploads HTML report | GitHub Actions |
+| TC-026 | CI/CD | Automated QA pipeline | Push or open a pull request | GitHub Actions installs dependencies, imports MySQL data, runs JUnit, Vitest, Playwright, DB/API tests, and uploads HTML report | GitHub Actions |
