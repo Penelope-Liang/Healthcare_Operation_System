@@ -1,4 +1,4 @@
-# HealthOps — Healthcare Operations Dashboard
+# Healthcare Operations Dashboard
 
 A full-stack healthcare operations dashboard covering the patient registry,
 vaccination records, vaccine lot inventory and shipments, clinic sites, and clinical staff assignments.
