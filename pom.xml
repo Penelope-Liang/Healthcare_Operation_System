@@ -15,7 +15,7 @@
     <artifactId>healthops</artifactId>
     <version>2.0.0</version>
     <name>Healthcare Operations</name>
-    <description>Spring Boot healthcare operations dashboard for COVID-19 vaccination logistics.</description>
+    <description>Spring Boot + Vue healthcare operations dashboard.</description>
 
     <properties>
         <java.version>21</java.version>

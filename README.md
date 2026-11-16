@@ -1,6 +1,6 @@
 # HealthOps — Healthcare Operations Dashboard
 
-A full-stack web application for running COVID-19 vaccination operations: patient registry,
+A full-stack healthcare operations dashboard covering the patient registry,
 vaccination records, vaccine lot inventory and shipments, clinic sites, and clinical staff assignments.
 A **Spring Boot** REST API over MySQL powers a **Vue 3** single-page frontend; both ship together as one jar.
 
