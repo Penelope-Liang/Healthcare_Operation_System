@@ -4,7 +4,7 @@
 
 This repository contains a web application only:
 
-- Spring Boot + Thymeleaf pages
+- Vue 3 single-page frontend served by Spring Boot
 - MySQL schema
 - Browser JavaScript
 - CSS
@@ -14,11 +14,11 @@ This repository contains a web application only:
 
 - Web UI automation with Playwright
 - REST API automation with Playwright request tests
-- JavaScript unit tests with Jest and jsdom
+- Frontend unit tests with Vitest, jsdom and Vue Test Utils
 - QA artifacts for test cases, defect reporting, traceability, and AI-assisted test review
 - Database-backed create/read tests for selected web workflows
 - Database-backed REST API CRUD tests for patients, clinics, vaccine lots, workers, shipments, and vaccination records
-- GitHub Actions pipeline for Jest, Playwright, API, and database-backed tests
+- GitHub Actions pipeline for JUnit, Vitest, Playwright, API, and database-backed tests
 
 ## Not In Scope
 

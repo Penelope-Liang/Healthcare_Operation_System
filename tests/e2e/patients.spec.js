@@ -39,7 +39,7 @@ test.describe("Patient management", () => {
     await expect(rows.filter({ hasText: "John Smith" })).toBeVisible();
   });
 
-  test("server-side validation re-opens the dialog with field errors", async ({ page }) => {
+  test("server-side validation errors appear in the dialog", async ({ page }) => {
     await page.goto("/patients");
     await page.getByRole("button", { name: "Add patient" }).click();
     const dialog = page.getByRole("dialog", { name: "Add patient" });

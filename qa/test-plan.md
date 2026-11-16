@@ -2,7 +2,7 @@
 
 ## Scope
 
-This project is a Java 21 / Spring Boot web application (Thymeleaf pages, JDBC, MySQL) with a JSON REST API. Current automation scope is web UI validation with Playwright, REST API validation with Playwright request tests, and JavaScript DOM behavior validation with Jest.
+This project is a Java 21 / Spring Boot REST API (JDBC, MySQL) with a Vue 3 single-page frontend. Current automation scope is backend integration testing with JUnit and MockMvc, frontend unit testing with Vitest, and browser UI plus REST API validation with Playwright.
 
 Mobile iOS and Android automation are outside the current application scope because this repository does not contain mobile apps.
 
@@ -11,7 +11,7 @@ Mobile iOS and Android automation are outside the current application scope beca
 - Verify core pages load and navigation works.
 - Verify patient form validation blocks invalid OHIP formats.
 - Verify operational create forms are present for patients, vaccines, clinics, workers, shipments, and vaccination records.
-- Verify searchable tables are connected to the table-filter behavior.
+- Verify search boxes filter their tables and card grids.
 - Verify pages render a usable error state when MySQL is unavailable.
 - Verify selected create flows persist records to MySQL and render them back in the UI.
 - Verify REST API health, resource CRUD, and API validation behavior.
@@ -21,7 +21,8 @@ Mobile iOS and Android automation are outside the current application scope beca
 
 - Playwright for browser end-to-end tests.
 - Playwright request testing for REST API checks.
-- Jest with jsdom for JavaScript behavior tests.
+- Vitest with jsdom and Vue Test Utils for frontend logic and component tests.
+- JUnit 5 + MockMvc for API and backend integration tests.
 - JDK 21 + Maven, with MySQL or the in-memory H2 `demo` profile for local execution.
 - GitHub Actions for CI execution on push and pull request.
 

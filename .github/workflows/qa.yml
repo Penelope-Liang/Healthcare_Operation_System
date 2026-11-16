@@ -43,9 +43,15 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
 
-      - name: Build and run JUnit / MockMvc tests
+      - name: Build Vue frontend + Spring Boot jar and run JUnit / MockMvc tests
         run: mvn -B verify
+
+      - name: Run Vitest frontend unit tests
+        run: npm --prefix frontend test
 
       - name: Import MySQL database
         run: mysql --protocol=tcp -h 127.0.0.1 -u root < database/covidDB.sql
@@ -55,9 +61,6 @@ jobs:
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-
-      - name: Run Jest unit tests
-        run: npm run test:unit
 
       - name: Run Playwright UI and API tests against MySQL
         run: npm run test:e2e
