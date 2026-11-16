@@ -1,9 +1,9 @@
-# Default profile: connects to the MySQL database created by database/covidDB.sql.
+# Default profile: connects to the MySQL database created from database/schema.sql.
 spring:
   application:
     name: healthops
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:covidDB}
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:healthops}
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:}
     hikari:

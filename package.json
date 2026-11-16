@@ -2,7 +2,7 @@
   "name": "healthcare-operation-system",
   "version": "1.0.0",
   "private": true,
-  "description": "HealthOps - Playwright end-to-end tests (Spring Boot API + Vue frontend).",
+  "description": "Healthcare Operations Dashboard - Playwright end-to-end tests (Spring Boot API + Vue frontend).",
   "scripts": {
     "build": "mvn -q -DskipTests package",
     "start": "java -jar target/healthops.jar --spring.profiles.active=demo",

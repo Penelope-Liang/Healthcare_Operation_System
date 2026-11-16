@@ -35,10 +35,11 @@ public class ShipmentApiController {
 
     @PostMapping
     public ResponseEntity<Shipment> create(@Valid @RequestBody ShipmentForm form) {
-        api.write(() -> shipments.insert(form.getLot(), form.getClinic()),
-                "Lot " + form.getLot() + " is already shipped to " + form.getClinic() + ".",
+        api.write(() -> shipments.insert(form.getLot(), form.getClinicName()),
+                "Lot " + form.getLot() + " is already shipped to " + form.getClinicName() + ".",
                 "Unknown lot or clinic.");
-        return ResponseEntity.status(HttpStatus.CREATED).body(shipments.find(form.getLot(), form.getClinic()).orElseThrow());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(shipments.find(form.getLot(), form.getClinicName()).orElseThrow());
     }
 
     @DeleteMapping("/{lot}/{clinic}")

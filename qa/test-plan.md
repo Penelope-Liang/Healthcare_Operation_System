@@ -10,7 +10,7 @@ Mobile iOS and Android automation are outside the current application scope beca
 
 - Verify core pages load and navigation works.
 - Verify patient form validation blocks invalid OHIP formats.
-- Verify operational create forms are present for patients, vaccines, clinics, workers, shipments, and vaccination records.
+- Verify operational create forms are present for patients, vaccines, clinics, staff, shipments, and vaccination records.
 - Verify search boxes filter their tables and card grids.
 - Verify pages render a usable error state when MySQL is unavailable.
 - Verify selected create flows persist records to MySQL and render them back in the UI.
@@ -31,7 +31,7 @@ Mobile iOS and Android automation are outside the current application scope beca
 - `mvn verify` passes (compilation plus JUnit/MockMvc integration tests).
 - The app can start from the `public/` web root.
 - MySQL is running when database-backed create scenarios are tested.
-- `covidDB` has been imported before running the end-to-end tests with `SPRING_PROFILES_ACTIVE=default` (not needed for the H2 `demo` profile).
+- The `healthops` database has been created from `database/schema.sql` and `database/seed.sql` before running the end-to-end tests with `SPRING_PROFILES_ACTIVE=default` (not needed for the H2 `demo` profile).
 
 ## Exit Criteria
 

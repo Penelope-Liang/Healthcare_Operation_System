@@ -14,30 +14,31 @@ public class DashboardRepository {
     private final JdbcClient jdbc;
     private final VaccinationRepository vaccinations;
     private final ClinicRepository clinics;
-    private final WorkerRepository workers;
+    private final StaffRepository staff;
 
     public DashboardRepository(JdbcClient jdbc, VaccinationRepository vaccinations,
-                               ClinicRepository clinics, WorkerRepository workers) {
+                               ClinicRepository clinics, StaffRepository staff) {
         this.jdbc = jdbc;
         this.vaccinations = vaccinations;
         this.clinics = clinics;
-        this.workers = workers;
+        this.staff = staff;
     }
 
     public DashboardSummary summary() {
         List<ManufacturerDoses> byManufacturer = jdbc.sql("""
-                SELECT CompanyName, COUNT(*) AS lots, COALESCE(SUM(Doses), 0) AS doses
-                FROM Vaccine GROUP BY CompanyName ORDER BY doses DESC, CompanyName
+                SELECT manufacturer, COUNT(*) AS lots, COALESCE(SUM(doses), 0) AS doses
+                FROM vaccine_lot GROUP BY manufacturer ORDER BY doses DESC, manufacturer
                 """)
-                .query((rs, n) -> new ManufacturerDoses(rs.getString("CompanyName"), rs.getInt("lots"), rs.getInt("doses")))
+                .query((rs, n) -> new ManufacturerDoses(rs.getString("manufacturer"), rs.getInt("lots"), rs.getInt("doses")))
                 .list();
 
         return new DashboardSummary(
-                count("Patient"),
-                count("Vaccination"),
-                count("VaxClinic"),
-                workers.count(Role.NURSE),
-                workers.count(Role.DOCTOR),
+                count("SELECT COUNT(*) FROM patient"),
+                count("SELECT COUNT(DISTINCT patient_ohip) FROM vaccination"),
+                count("SELECT COUNT(*) FROM vaccination"),
+                count("SELECT COUNT(*) FROM clinic"),
+                staff.count(Role.NURSE),
+                staff.count(Role.DOCTOR),
                 byManufacturer.stream().mapToInt(ManufacturerDoses::lots).sum(),
                 byManufacturer.stream().mapToInt(ManufacturerDoses::doses).sum(),
                 byManufacturer,
@@ -45,7 +46,7 @@ public class DashboardRepository {
                 clinics.findOverview());
     }
 
-    private int count(String table) {
-        return jdbc.sql("SELECT COUNT(*) FROM " + table).query(Integer.class).single();
+    private int count(String sql) {
+        return jdbc.sql(sql).query(Integer.class).single();
     }
 }

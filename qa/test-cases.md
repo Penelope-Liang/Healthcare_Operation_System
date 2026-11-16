@@ -10,14 +10,14 @@
 | TC-006 | Vaccines | Vaccine lot create form exists | Open Vaccines page | Add Vaccine Lot form and submit button are visible | Playwright |
 | TC-007 | Vaccines | Shipment assignment form exists | Open Vaccines page | Assign Shipment form and submit button are visible | Playwright |
 | TC-008 | Clinics | Clinic create form exists | Open Clinics page | Add Clinic form and submit button are visible | Playwright |
-| TC-009 | Workers | Worker assignment create form exists | Open Workers page | Role, credential, clinic fields, and submit button are visible | Playwright |
+| TC-009 | Staff | Staff create form exists | Open Clinical staff page | Role, credentials, clinic fields, and submit button are visible | Playwright |
 | TC-010 | Reports | Vaccination record create form exists | Open Reports page | Patient, clinic, lot, date, time fields, and submit button are visible | Playwright |
 | TC-011 | Error Handling | Database unavailable state | Stop MySQL and open dashboard | Page renders with a database error notice instead of a blank screen | Playwright |
 | TC-012 | Patients | Required patient fields | Submit patient form with missing OHIP, first name, last name, or DOB | Browser validation blocks submission | Playwright |
 | TC-013 | Patients | Patient name boundary | Enter numbers in first or last name | Browser validation reports pattern mismatch | Playwright |
 | TC-014 | Vaccines | Vaccine dose boundary | Enter a negative dose count | Browser validation reports range underflow | Playwright |
 | TC-015 | Clinics | Required clinic fields | Submit clinic form with missing name or operating date | Browser validation blocks submission | Playwright |
-| TC-016 | Workers | Required worker assignment fields | Submit worker form with missing role, ID, credential, or clinic | Browser validation blocks submission | Playwright |
+| TC-016 | Staff | Required staff fields | Submit staff form with missing ID, credentials, or clinic | Browser validation blocks submission | Playwright |
 | TC-017 | Reports | Required vaccination fields | Submit vaccination form with missing patient, clinic, lot, date, or time | Browser validation blocks submission | Playwright |
 | TC-018 | Patients | Patient create/read persistence | Create a unique patient, filter patient table by OHIP | New patient appears in the table | Playwright DB |
 | TC-019 | Clinics | Clinic create/read persistence | Create a unique clinic, filter clinic table by name | New clinic appears in the table | Playwright DB |
@@ -26,5 +26,5 @@
 | TC-022 | API | API health check | GET `/api/health` | JSON response returns status and database state | Playwright API |
 | TC-023 | API | Patient API CRUD | POST a unique patient, GET it by OHIP, PUT updated patient values, DELETE it, then GET again | API returns correct create/read/update/delete status codes and data | Playwright DB API |
 | TC-024 | API | Patient API validation | POST invalid patient JSON | API returns validation error | Playwright DB API |
-| TC-025 | API | Resource API CRUD | Create, read, update, and delete clinics, vaccine lots, workers, and vaccination records; create/read/delete shipments | API returns correct status codes and persisted JSON data | Playwright DB API |
+| TC-025 | API | Resource API CRUD | Create, read, update, and delete clinics, vaccine lots, staff, and vaccination records; create/read/delete shipments | API returns correct status codes and persisted JSON data | Playwright DB API |
 | TC-026 | CI/CD | Automated QA pipeline | Push or open a pull request | GitHub Actions installs dependencies, imports MySQL data, runs JUnit, Vitest, Playwright, DB/API tests, and uploads HTML report | GitHub Actions |

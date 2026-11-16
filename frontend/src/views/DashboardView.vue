@@ -6,12 +6,13 @@ import LoadState from "@/components/LoadState.vue";
 import { useResource } from "@/composables/useResource";
 import { api } from "@/lib/api";
 import { prettyDate } from "@/lib/dates";
+import { plural } from "@/lib/text";
 
 const { data: s, loading, error, reload } = useResource(api.dashboard);
 
 const today = new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" }).format(new Date());
 const staff = computed(() => s.value.nurses + s.value.doctors);
-const coverage = computed(() => (s.value.patients === 0 ? 0 : Math.round((s.value.vaccinated * 100) / s.value.patients)));
+const coverage = computed(() => (s.value.patients === 0 ? 0 : Math.round((s.value.vaccinatedPatients * 100) / s.value.patients)));
 const maxDoses = computed(() => Math.max(1, ...s.value.dosesByManufacturer.map((m) => m.doses)));
 
 function clinicStatus(c) {
@@ -44,7 +45,7 @@ function clinicStatus(c) {
               <span class="icon-bubble info"><AppIcon name="users" /></span>
             </div>
             <div class="kpi-value">{{ s.patients }}</div>
-            <p class="kpi-foot">{{ s.patients - s.vaccinated }} awaiting a first dose</p>
+            <p class="kpi-foot">{{ s.patients - s.vaccinatedPatients }} awaiting a first dose</p>
           </article>
           <article class="card kpi">
             <div class="kpi-top">
@@ -52,6 +53,7 @@ function clinicStatus(c) {
               <span class="icon-bubble success"><AppIcon name="shield" /></span>
             </div>
             <div class="kpi-value">{{ coverage }}<small>%</small></div>
+            <p class="kpi-foot">{{ plural(s.dosesAdministered, "dose") }} given to {{ s.vaccinatedPatients }} patients</p>
             <div class="progress" role="progressbar" aria-label="Vaccination coverage"
                  :aria-valuenow="coverage" aria-valuemin="0" aria-valuemax="100">
               <span :style="{ width: coverage + '%' }"></span>
@@ -85,11 +87,11 @@ function clinicStatus(c) {
               <RouterLink class="link-arrow" to="/vaccinations">View all <AppIcon name="arrow-right" /></RouterLink>
             </div>
             <div class="list">
-              <div v-for="v in s.recentVaccinations" :key="v.ohip" class="list-row">
+              <div v-for="v in s.recentVaccinations" :key="v.id" class="list-row">
                 <PersonAvatar :first="v.firstName" :last="v.lastName" />
                 <div class="grow cell-stack">
                   <strong>{{ v.firstName }} {{ v.lastName }}</strong>
-                  <span class="sub">{{ v.clinicName }}</span>
+                  <span class="sub">Dose {{ v.doseNumber }} · {{ v.clinicName }}</span>
                 </div>
                 <span class="badge info plain">{{ v.manufacturer }}</span>
                 <div class="meta cell-stack">
@@ -156,7 +158,7 @@ function clinicStatus(c) {
                   <td>
                     <div class="cell-stack">
                       <strong>{{ c.clinic.name }}</strong>
-                      <span class="sub">{{ c.clinic.city }}, {{ c.clinic.prov }}</span>
+                      <span class="sub">{{ c.clinic.city }}, {{ c.clinic.province }}</span>
                     </div>
                   </td>
                   <td>

@@ -1,4 +1,4 @@
 package com.healthops.domain;
 
-public record Shipment(String lot, String clinic, String companyName, int doses) {
+public record Shipment(String lot, String clinicName, String manufacturer, int doses) {
 }

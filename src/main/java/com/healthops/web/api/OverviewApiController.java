@@ -9,7 +9,7 @@ import com.healthops.repository.ClinicRepository;
 import com.healthops.repository.DashboardRepository;
 import com.healthops.repository.PatientRepository;
 import com.healthops.repository.VaccinationRepository;
-import com.healthops.repository.VaccineRepository;
+import com.healthops.repository.VaccineLotRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,11 +25,11 @@ public class OverviewApiController {
     private final PatientRepository patients;
     private final VaccinationRepository vaccinations;
     private final ClinicRepository clinics;
-    private final VaccineRepository vaccines;
+    private final VaccineLotRepository vaccines;
 
     public OverviewApiController(DashboardRepository dashboard, PatientRepository patients,
                                  VaccinationRepository vaccinations, ClinicRepository clinics,
-                                 VaccineRepository vaccines) {
+                                 VaccineLotRepository vaccines) {
         this.dashboard = dashboard;
         this.patients = patients;
         this.vaccinations = vaccinations;
@@ -42,13 +42,13 @@ public class OverviewApiController {
         return dashboard.summary();
     }
 
-    /** Every patient with their vaccination (if any), vaccine manufacturer and clinic. */
+    /** Every patient with their dose count and most recent dose. */
     @GetMapping("/patients/overview")
     public List<PatientOverview> patientOverview() {
         return patients.findOverview();
     }
 
-    /** Vaccination records with patient and manufacturer names, newest first. */
+    /** Doses with patient and manufacturer names and per-patient dose numbers, newest first. */
     @GetMapping("/vaccinations/details")
     public List<VaccinationDetail> vaccinationDetails() {
         return vaccinations.findDetails(Integer.MAX_VALUE);

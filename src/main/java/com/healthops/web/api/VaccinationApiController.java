@@ -11,6 +11,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 
+/** One record per dose; a patient can have several (first dose, second dose, boosters). */
 @RestController
 @RequestMapping("/api/vaccinations")
 public class VaccinationApiController {
@@ -30,42 +31,37 @@ public class VaccinationApiController {
         return vaccinations.findAll();
     }
 
-    @GetMapping("/{ohip}")
-    public Vaccination get(@PathVariable String ohip) {
-        return vaccinations.findById(ohip).orElseThrow(() -> notFound(ohip));
+    @GetMapping("/{id}")
+    public Vaccination get(@PathVariable long id) {
+        return vaccinations.findById(id).orElseThrow(() -> notFound(id));
     }
 
     @PostMapping
     public ResponseEntity<Vaccination> create(@Valid @RequestBody VaccinationForm form) {
-        Vaccination vaccination = form.toVaccination();
-        api.write(() -> vaccinations.insert(vaccination),
-                "Patient " + vaccination.ohip() + " already has a vaccination record.",
-                UNKNOWN_REFERENCE);
+        Vaccination saved = api.write(() -> vaccinations.insert(form.toVaccination(null)), "", UNKNOWN_REFERENCE);
         return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{ohip}").buildAndExpand(vaccination.ohip()).toUri()).body(vaccination);
+                .path("/{id}").buildAndExpand(saved.id()).toUri()).body(saved);
     }
 
-    @PutMapping("/{ohip}")
-    public Vaccination update(@PathVariable String ohip, @RequestBody VaccinationForm form) {
-        form.setOhip(ohip);
-        api.validate(form);
-        Vaccination vaccination = form.toVaccination();
-        boolean updated = api.write(() -> vaccinations.update(vaccination), "", UNKNOWN_REFERENCE);
-        if (!updated) {
-            throw notFound(ohip);
+    @PutMapping("/{id}")
+    public Vaccination update(@PathVariable long id, @Valid @RequestBody VaccinationForm form) {
+        Vaccination vaccination = form.toVaccination(id);
+        boolean found = api.write(() -> vaccinations.update(vaccination), "", UNKNOWN_REFERENCE);
+        if (!found) {
+            throw notFound(id);
         }
         return vaccination;
     }
 
-    @DeleteMapping("/{ohip}")
-    public ResponseEntity<Void> delete(@PathVariable String ohip) {
-        if (!vaccinations.delete(ohip)) {
-            throw notFound(ohip);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable long id) {
+        if (!vaccinations.delete(id)) {
+            throw notFound(id);
         }
         return ResponseEntity.noContent().build();
     }
 
-    private static NotFoundException notFound(String ohip) {
-        return new NotFoundException("No vaccination record for patient " + ohip + ".");
+    private static NotFoundException notFound(long id) {
+        return new NotFoundException("Vaccination record " + id + " not found.");
     }
 }

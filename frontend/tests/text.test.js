@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { groupStaff, matchesQuery } from "@/lib/text";
+import { matchesQuery, plural, splitList } from "@/lib/text";
 
 describe("matchesQuery", () => {
   test("is case-insensitive and matches any value", () => {
@@ -13,18 +13,18 @@ describe("matchesQuery", () => {
   });
 });
 
-describe("groupStaff", () => {
-  test("merges one-row-per-clinic results into one entry per person", () => {
-    const staff = groupStaff([
-      { role: "doctor", id: "XC546", firstName: "Cindy", lastName: "Young", credential: "CNNP", clinicName: "Frontenac" },
-      { role: "doctor", id: "XC546", firstName: "Cindy", lastName: "Young", credential: "CNNP", clinicName: "Quarry" },
-      { role: "nurse", id: "XC546", firstName: "Same", lastName: "Id", credential: "RN", clinicName: "Rexall" },
-      { role: "doctor", id: "VB980", firstName: "Sherry", lastName: "Fox", credential: "MBBS", clinicName: null }
-    ]);
+describe("splitList", () => {
+  test("splits comma-separated input, trimming blanks and duplicates", () => {
+    expect(splitList(" RN, BSN ,, rn ,CCRN")).toEqual(["RN", "BSN", "CCRN"]);
+    expect(splitList("")).toEqual([]);
+    expect(splitList(undefined)).toEqual([]);
+  });
+});
 
-    expect(staff).toHaveLength(3);
-    expect(staff[0].clinics).toEqual(["Frontenac", "Quarry"]);
-    expect(staff[1].role).toBe("nurse");
-    expect(staff[2].clinics).toEqual([]);
+describe("plural", () => {
+  test("adds an s except for one", () => {
+    expect(plural(1, "dose")).toBe("1 dose");
+    expect(plural(0, "dose")).toBe("0 doses");
+    expect(plural(3, "patient")).toBe("3 patients");
   });
 });

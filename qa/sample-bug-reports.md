@@ -9,7 +9,7 @@ These examples use a Jira-style defect format to show how issues would be docume
 - Browser: Chromium
 - OS: macOS
 - App URL: `/patients`
-- Database state: `covidDB` imported
+- Database state: `healthops` created from `schema.sql` + `seed.sql`
 - Commit: local test build
 
 ## Steps to Reproduce
@@ -43,7 +43,7 @@ High
 - Browser: Chromium
 - OS: macOS
 - App URL: `/vaccines`
-- Database state: `covidDB` imported
+- Database state: `healthops` created from `schema.sql` + `seed.sql`
 - Commit: local test build
 
 ## Steps to Reproduce
@@ -77,7 +77,7 @@ High
 - Client: Playwright request API
 - OS: macOS
 - App URL: `/api/patients`
-- Database state: `covidDB` imported
+- Database state: `healthops` created from `schema.sql` + `seed.sql`
 - Commit: local test build
 
 ## Steps to Reproduce

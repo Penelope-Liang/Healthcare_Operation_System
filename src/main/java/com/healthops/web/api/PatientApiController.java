@@ -57,7 +57,7 @@ public class PatientApiController {
     @DeleteMapping("/{ohip}")
     public ResponseEntity<Void> delete(@PathVariable String ohip) {
         boolean deleted = api.write(() -> patients.delete(ohip), "",
-                "Patient " + ohip + " still has a vaccination or spouse record. Remove it first.");
+                "Patient " + ohip + " still has vaccination records. Remove them first.");
         if (!deleted) {
             throw notFound(ohip);
         }

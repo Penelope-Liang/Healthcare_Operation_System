@@ -34,7 +34,7 @@ test.describe("Form boundary validation", () => {
     const dialog = await openDialog(page, "/vaccines", "Add lot", "Add vaccine lot");
 
     await expectInvalidAfterSubmit(dialog, "Create lot", dialog.getByLabel("Lot code"), "validity.valueMissing");
-    await expect(dialog.getByLabel("Lot code")).toHaveAttribute("maxlength", "6");
+    await expect(dialog.getByLabel("Lot code")).toHaveAttribute("maxlength", "12");
 
     await dialog.getByLabel("Lot code").fill("ZZ99!");
     await expect(dialog.getByLabel("Lot code")).toHaveJSProperty("validity.patternMismatch", true);

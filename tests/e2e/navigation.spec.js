@@ -14,7 +14,7 @@ test.describe("Core navigation", () => {
     test(`${name} page loads`, async ({ page }) => {
       await page.goto(path);
       await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
-      await expect(page).toHaveTitle(new RegExp(`${heading} · HealthOps`));
+      await expect(page).toHaveTitle(new RegExp(`${heading} · Healthcare Operations Dashboard`));
     });
   }
 

@@ -23,19 +23,19 @@ test.describe("REST API", () => {
     const ohip = uniqueOhip();
 
     const created = await request.post("/api/patients", {
-      data: { ohip, firstName: "Api", lastName: "Patient", dob: "1994-04-14" }
+      data: { ohip, firstName: "Api", lastName: "O'Patient", dateOfBirth: "1994-04-14" }
     });
     expect(created.status()).toBe(201);
     expect(created.headers()["location"]).toContain(`/api/patients/${ohip}`);
 
     const read = await request.get(`/api/patients/${ohip}`);
-    expect((await read.json()).firstName).toBe("Api");
+    expect((await read.json()).lastName).toBe("O'Patient");
 
     const updated = await request.put(`/api/patients/${ohip}`, {
-      data: { firstName: "Updated", lastName: "Patient", dob: "1994-04-15" }
+      data: { firstName: "Updated", lastName: "Patient", dateOfBirth: "1994-04-15" }
     });
     expect(updated.ok()).toBe(true);
-    expect((await updated.json()).dob).toBe("1994-04-15");
+    expect((await updated.json()).dateOfBirth).toBe("1994-04-15");
 
     expect((await request.delete(`/api/patients/${ohip}`)).status()).toBe(204);
     const gone = await request.get(`/api/patients/${ohip}`);
@@ -49,9 +49,9 @@ test.describe("REST API", () => {
 
     expect(response.status()).toBe(422);
     expect(body.fieldErrors.ohip).toBe("OHIP must use the format 0000-000-000.");
-    expect(body.fieldErrors.firstName).toBe("First name must be 1-30 letters.");
+    expect(body.fieldErrors.firstName).toContain("First name must be 1-30 letters");
     expect(body.fieldErrors.lastName).toBe("Last name is required.");
-    expect(body.fieldErrors.dob).toBe("Date of birth is required.");
+    expect(body.fieldErrors.dateOfBirth).toBe("Date of birth is required.");
   });
 
   test("malformed JSON is rejected", async ({ request }) => {
@@ -62,46 +62,51 @@ test.describe("REST API", () => {
     expect(response.status()).toBe(400);
   });
 
-  test("clinic, vaccine lot, shipment, vaccination and worker lifecycle", async ({ request }) => {
+  test("clinic, vaccine lot, shipment, vaccination and staff lifecycle", async ({ request }) => {
     const suffix = uniqueSuffix(4);
-    const clinic = `Api Clinic ${suffix}`;
+    const clinicName = `Api Clinic ${suffix}`;
     const lot = `Z${suffix}`;
     const ohip = uniqueOhip();
-    const workerId = `W${suffix}`;
+    const staffId = `W${suffix}`;
 
     expect((await request.post("/api/clinics", {
-      data: { name: clinic, street: "100 Api Street", city: "Kingston", prov: "ON", pc: "K7L 1A1", operatingDate: "2026-08-02" }
+      data: { name: clinicName, street: "100 Api Street", city: "Kingston", province: "ON", postalCode: "K7L 1A1", operatingDate: "2026-08-02" }
     })).status()).toBe(201);
     expect((await request.post("/api/vaccines", {
-      data: { lot, companyName: "Pfizer", production: "2026-08-02", expiry: "2027-08-02", doses: 20 }
+      data: { lot, manufacturer: "Pfizer", productionDate: "2026-08-02", expiryDate: "2027-08-02", doses: 20 }
     })).status()).toBe(201);
-    expect((await request.post("/api/shipments", { data: { lot, clinic } })).status()).toBe(201);
-    expect((await request.post("/api/shipments", { data: { lot, clinic } })).status()).toBe(409);
+    expect((await request.post("/api/shipments", { data: { lot, clinicName } })).status()).toBe(201);
+    expect((await request.post("/api/shipments", { data: { lot, clinicName } })).status()).toBe(409);
 
     expect((await request.post("/api/patients", {
-      data: { ohip, firstName: "Shot", lastName: "Taker", dob: "1980-01-01" }
+      data: { ohip, firstName: "Shot", lastName: "Taker", dateOfBirth: "1980-01-01" }
     })).status()).toBe(201);
-    expect((await request.post("/api/vaccinations", {
-      data: { ohip, clinicName: clinic, lot, date: "2026-08-03", time: "09:30" }
-    })).status()).toBe(201);
+    const doseIds = [];
+    for (const date of ["2026-08-03", "2026-11-03"]) {
+      const dose = await request.post("/api/vaccinations", { data: { ohip, clinicName, lot, date, time: "09:30" } });
+      expect(dose.status()).toBe(201);
+      doseIds.push((await dose.json()).id);
+    }
 
-    const worker = await request.post("/api/workers", {
-      data: { role: "nurse", id: workerId, firstName: "Api", lastName: "Nurse", credential: "RN", clinicName: clinic }
+    const member = await request.post("/api/staff", {
+      data: { id: staffId, role: "nurse", firstName: "Api", lastName: "Nurse", credentials: ["RN"], clinics: [clinicName] }
     });
-    expect(worker.status()).toBe(201);
-    const updatedWorker = await request.put(`/api/workers/nurse/${workerId}`, {
-      data: { firstName: "Api", lastName: "Nurse", credential: "BSN", clinicName: clinic }
+    expect(member.status()).toBe(201);
+    const updatedMember = await request.put(`/api/staff/${staffId}`, {
+      data: { role: "nurse", firstName: "Api", lastName: "Nurse", credentials: ["RN", "BSN"], clinics: [clinicName] }
     });
-    expect((await updatedWorker.json()).credential).toBe("BSN");
+    expect((await updatedMember.json()).credentials).toEqual(["RN", "BSN"]);
 
-    // The clinic is still referenced by the vaccination record.
-    expect((await request.delete(`/api/clinics/${encodeURIComponent(clinic)}`)).status()).toBe(409);
+    // The clinic is still referenced by vaccination records.
+    expect((await request.delete(`/api/clinics/${encodeURIComponent(clinicName)}`)).status()).toBe(409);
 
-    expect((await request.delete(`/api/workers/nurse/${workerId}`)).status()).toBe(204);
-    expect((await request.delete(`/api/vaccinations/${ohip}`)).status()).toBe(204);
+    expect((await request.delete(`/api/staff/${staffId}`)).status()).toBe(204);
+    for (const id of doseIds) {
+      expect((await request.delete(`/api/vaccinations/${id}`)).status()).toBe(204);
+    }
     expect((await request.delete(`/api/patients/${ohip}`)).status()).toBe(204);
-    expect((await request.delete(`/api/shipments/${lot}/${encodeURIComponent(clinic)}`)).status()).toBe(204);
+    expect((await request.delete(`/api/shipments/${lot}/${encodeURIComponent(clinicName)}`)).status()).toBe(204);
     expect((await request.delete(`/api/vaccines/${lot}`)).status()).toBe(204);
-    expect((await request.delete(`/api/clinics/${encodeURIComponent(clinic)}`)).status()).toBe(204);
+    expect((await request.delete(`/api/clinics/${encodeURIComponent(clinicName)}`)).status()).toBe(204);
   });
 });
