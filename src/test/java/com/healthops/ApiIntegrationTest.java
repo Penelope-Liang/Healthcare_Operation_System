@@ -241,4 +241,70 @@ class ApiIntegrationTest {
         // The insert ran in one transaction, so no half-created staff row is left behind.
         mvc.perform(get("/api/staff/ZZ2")).andExpect(status().isNotFound());
     }
+
+    @Test
+    void vaccineLotReadUpdateAndNotFound() throws Exception {
+        mvc.perform(get("/api/vaccines/AB1234"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.manufacturer").value("Astrazeneca"))
+                .andExpect(jsonPath("$.expiryDate").value("2022-08-01"));
+        mvc.perform(get("/api/vaccines"))
+                .andExpect(jsonPath("$[*].lot", hasItem("KL6789")));
+
+        postJson("/api/vaccines", """
+                {"lot":"UPD001","manufacturer":"Moderna","productionDate":"2026-01-01","expiryDate":"2026-12-31","doses":5}""")
+                .andExpect(status().isCreated());
+        putJson("/api/vaccines/UPD001", """
+                {"manufacturer":"Pfizer","productionDate":"2026-01-01","expiryDate":"2027-06-30","doses":12}""")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.doses").value(12));
+        mvc.perform(get("/api/vaccines/UPD001")).andExpect(jsonPath("$.manufacturer").value("Pfizer"));
+        putJson("/api/vaccines/UPD001", """
+                {"manufacturer":"Nobody Inc","productionDate":"2026-01-01","expiryDate":"2027-06-30","doses":12}""")
+                .andExpect(status().isConflict());
+        putJson("/api/vaccines/UPD001", """
+                {"manufacturer":"Pfizer","productionDate":"2026-01-01","expiryDate":"2025-06-30","doses":12}""")
+                .andExpect(status().isUnprocessableEntity());
+        mvc.perform(delete("/api/vaccines/UPD001")).andExpect(status().isNoContent());
+
+        mvc.perform(get("/api/vaccines/NOPE01")).andExpect(status().isNotFound());
+        putJson("/api/vaccines/NOPE01", """
+                {"manufacturer":"Pfizer","productionDate":"2026-01-01","expiryDate":"2027-06-30","doses":1}""")
+                .andExpect(status().isNotFound());
+        mvc.perform(delete("/api/vaccines/NOPE01")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void listsAndMissingRecordsAcrossResources() throws Exception {
+        mvc.perform(get("/api/shipments")).andExpect(jsonPath("$[*].lot", hasItem("AB1234")));
+        mvc.perform(get("/api/shipments/AB1234/Nowhere")).andExpect(status().isNotFound());
+        mvc.perform(delete("/api/shipments/AB1234/Nowhere")).andExpect(status().isNotFound());
+        postJson("/api/shipments", """
+                {"lot":"NOPE01","clinicName":"Rexall"}""").andExpect(status().isConflict());
+        postJson("/api/shipments", "{}")
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.fieldErrors.lot").value("Lot is required."))
+                .andExpect(jsonPath("$.fieldErrors.clinicName").value("Clinic is required."));
+
+        mvc.perform(get("/api/vaccinations")).andExpect(jsonPath("$[*].ohip", hasItem("1029-293-345")));
+        mvc.perform(get("/api/patients")).andExpect(jsonPath("$[*].ohip", hasItem("1029-293-345")));
+        mvc.perform(get("/api/clinics")).andExpect(jsonPath("$[*].name", hasItem("Rexall")));
+        mvc.perform(get("/api/clinics/Nowhere")).andExpect(status().isNotFound());
+        mvc.perform(get("/api/staff")).andExpect(jsonPath("$[*].id", hasItem("QW102")));
+
+        putJson("/api/patients/0000-000-000", """
+                {"firstName":"No","lastName":"One","dateOfBirth":"1990-01-01"}""").andExpect(status().isNotFound());
+        putJson("/api/clinics/Nowhere", """
+                {"street":"1 Main","city":"Kingston","province":"ON","postalCode":"K7L 1A1","operatingDate":"2026-01-01"}""")
+                .andExpect(status().isNotFound());
+        putJson("/api/staff/NOPE1", """
+                {"role":"nurse","firstName":"No","lastName":"One","credentials":["RN"]}""").andExpect(status().isNotFound());
+        mvc.perform(delete("/api/staff/NOPE1")).andExpect(status().isNotFound());
+        putJson("/api/vaccinations/999999", """
+                {"ohip":"1029-293-345","clinicName":"Rexall","lot":"CD2345","date":"2026-01-01","time":"10:00"}""")
+                .andExpect(status().isNotFound());
+        mvc.perform(delete("/api/vaccinations/999999")).andExpect(status().isNotFound());
+        mvc.perform(delete("/api/patients/0000-000-000")).andExpect(status().isNotFound());
+        mvc.perform(post("/api/health")).andExpect(status().isMethodNotAllowed());
+    }
 }
