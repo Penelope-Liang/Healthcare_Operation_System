@@ -1,0 +1,37 @@
+# Runs the dashboard against a real MySQL database:
+#   docker compose up --build
+# then open http://localhost:8080. The database is created from database/schema.sql and
+# database/seed.sql the first time; `docker compose down -v` resets it.
+#
+# The password below is for local development only.
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: healthops
+      MYSQL_ROOT_PASSWORD: local-dev-only
+    volumes:
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-plocal-dev-only"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      DB_NAME: healthops
+      DB_USER: root
+      DB_PASSWORD: local-dev-only
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:

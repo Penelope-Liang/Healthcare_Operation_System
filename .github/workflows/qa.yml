@@ -47,8 +47,28 @@ jobs:
             package-lock.json
             frontend/package-lock.json
 
-      - name: Build Vue frontend + Spring Boot jar and run JUnit / MockMvc tests
+      - name: Build Vue frontend + Spring Boot jar, run JUnit / MockMvc tests and check coverage
         run: mvn -B verify
+
+      - name: Write coverage summary
+        if: always()
+        run: |
+          if [ -f target/site/jacoco/jacoco.csv ]; then
+            awk -F, 'NR > 1 { lm += $8; lc += $9; bm += $6; bc += $7 }
+              END {
+                printf "### Java test coverage (JaCoCo)\n\n| Metric | Coverage |\n| --- | --- |\n"
+                printf "| Lines | %.1f%% (%d of %d) |\n", 100 * lc / (lc + lm), lc, lc + lm
+                printf "| Branches | %.1f%% (%d of %d) |\n", 100 * bc / (bc + bm), bc, bc + bm
+              }' target/site/jacoco/jacoco.csv >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: target/site/jacoco/
+          retention-days: 14
 
       - name: Run Vitest frontend unit tests
         run: npm --prefix frontend test

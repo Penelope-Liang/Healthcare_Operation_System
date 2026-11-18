@@ -1,0 +1,13 @@
+# Keep the build context small and free of local artifacts.
+.git
+.github
+**/node_modules
+target
+frontend/dist
+playwright-report
+test-results
+docs
+qa
+tests
+*.log
+.DS_Store
