@@ -29,7 +29,7 @@ COPY --from=frontend /app/target/classes/static ./target/classes/static
 RUN mvn -B -q -DskipFrontend -DskipTests -Djacoco.skip=true package
 
 # ---- 3. Small runtime image -----------------------------------------------------------
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:24-jre
 RUN groupadd --system app && useradd --system --gid app --uid 10001 app
 WORKDIR /app
 COPY --from=backend /app/target/healthops.jar app.jar
