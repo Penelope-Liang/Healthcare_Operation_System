@@ -1,5 +1,8 @@
 # Healthcare Operations Dashboard
 
+[![QA Automation](https://github.com/Penelope-Liang/Healthcare_Operation_System/actions/workflows/qa.yml/badge.svg)](https://github.com/Penelope-Liang/Healthcare_Operation_System/actions/workflows/qa.yml)
+[![Docker image](https://github.com/Penelope-Liang/Healthcare_Operation_System/actions/workflows/docker.yml/badge.svg)](https://github.com/Penelope-Liang/Healthcare_Operation_System/actions/workflows/docker.yml)
+
 A full-stack healthcare operations dashboard covering the patient registry,
 vaccination records, vaccine lot inventory and shipments, clinic sites, and clinical staff assignments.
 A **Spring Boot** REST API over MySQL powers a **Vue 3** single-page frontend; both ship together as one jar.
@@ -13,11 +16,11 @@ A **Spring Boot** REST API over MySQL powers a **Vue 3** single-page frontend; b
 ## Features
 
 - **Dashboard**: patient count, vaccination coverage, clinic and staff totals, recent vaccinations, doses by manufacturer, and a per-clinic supply/staffing status table
-- **Patients**: searchable directory showing each patient's vaccination status, vaccine, clinic and appointment, plus forms to register or remove patients
-- **Vaccinations**: record a dose for a patient who doesn't have one yet (patient, clinic, lot, date and time), and delete records
+- **Patients**: searchable directory showing each patient's vaccination status, dose count and most recent dose, plus forms to register or remove patients
+- **Vaccinations**: record first doses, second doses and boosters (patient, clinic, lot, date and time); each record shows its dose number
 - **Vaccine inventory**: lots with production and expiry dates, an automatic *Expired* badge, dose totals, and shipment assignment from lot to clinic
 - **Clinics**: a card for each site with its address, operating date, shipped lots, staff count and doses given
-- **Clinical staff**: nurses and doctors with credentials and clinic assignments, filterable by role
+- **Clinical staff**: nurses and doctors with any number of credentials and clinic assignments, filterable by role
 - **REST API**: CRUD for every resource, with field-level validation errors and clear 404 / 409 responses
 - Responsive layout that becomes a top navigation bar on phones, automatic dark mode, and accessible dialogs, labels and focus states
 - When MySQL is down, the API returns 503 and each page shows how to fix it, instead of crashing
@@ -29,10 +32,11 @@ A **Spring Boot** REST API over MySQL powers a **Vue 3** single-page frontend; b
 | Language / runtime | Java 21 |
 | Framework | Spring Boot 3.3 (Spring MVC, Bean Validation) |
 | Frontend | Vue 3 (Composition API, `<script setup>`), Vue Router, Vite, hand-written CSS design system |
-| Data access | Spring `JdbcClient` with plain SQL over the existing schema |
+| Data access | Spring `JdbcClient` with plain SQL |
 | Database | MySQL 8 (production), H2 in MySQL mode (`demo` profile and tests) |
-| Tests | JUnit 5 + MockMvc, Vitest + Vue Test Utils, Playwright (UI + API) |
-| CI | GitHub Actions with a MySQL service container |
+| Tests | JUnit 5 + MockMvc, Vitest + Vue Test Utils, Playwright (UI + API), JaCoCo coverage |
+| CI/CD | GitHub Actions (tests against a MySQL service container, Docker image published to GHCR), Dependabot |
+| Packaging | Multi-stage Dockerfile, Docker Compose with MySQL |
 
 ## Project structure
 
@@ -41,7 +45,7 @@ A **Spring Boot** REST API over MySQL powers a **Vue 3** single-page frontend; b
 |-- src/                                 Spring Boot backend (REST API only)
 |   |-- main/java/com/healthops/
 |   |   |-- config/                      JSON input trimming
-|   |   |-- domain/                      records: Patient, Clinic, Vaccine, Worker, ...
+|   |   |-- domain/                      records: Patient, Clinic, VaccineLot, StaffMember, ...
 |   |   |-- repository/                  SQL via JdbcClient, one class per aggregate
 |   |   `-- web/
 |   |       |-- api/                     REST controllers + JSON error handling
@@ -49,8 +53,7 @@ A **Spring Boot** REST API over MySQL powers a **Vue 3** single-page frontend; b
 |   |       `-- SpaController.java       serves index.html for Vue routes
 |   |-- main/resources/
 |   |   |-- application.yml              MySQL settings (env-var driven)
-|   |   |-- application-demo.yml         in-memory H2 profile
-|   |   `-- db/                          H2 schema + seed data for the demo profile
+|   |   `-- application-demo.yml         in-memory H2 profile
 |   `-- test/java/                       JUnit / MockMvc integration tests
 |-- frontend/                            Vue 3 + Vite single-page app
 |   |-- src/
@@ -67,6 +70,12 @@ A **Spring Boot** REST API over MySQL powers a **Vue 3** single-page frontend; b
 |   `-- seed.sql                         sample data
 |-- tests/e2e/                           Playwright UI + API tests
 |-- qa/                                  test plan, cases, traceability, bug reports
+|-- .github/
+|   |-- workflows/qa.yml                 build, tests, coverage
+|   |-- workflows/docker.yml             build, smoke-test and publish the Docker image
+|   `-- dependabot.yml                   weekly dependency updates
+|-- Dockerfile                           multi-stage build: Vue -> Spring Boot jar -> JRE image
+|-- docker-compose.yml                   app + MySQL 8 for local use
 `-- pom.xml                              Maven build (also builds the frontend)
 ```
 
@@ -120,6 +129,28 @@ Connection settings come from environment variables:
 | `DB_USER` | `root` |
 | `DB_PASSWORD` | *(empty)* |
 | `PORT` | `8080` |
+
+### Option 3: Docker
+
+Run with the in-memory demo database:
+
+```bash
+docker build -t healthcare-dashboard .
+```
+
+```bash
+docker run -p 8080:8080 -e SPRING_PROFILES_ACTIVE=demo healthcare-dashboard
+```
+
+Or run the app together with a MySQL 8 container. The database is created from `database/schema.sql` and
+`database/seed.sql` on first start:
+
+```bash
+docker compose up --build
+```
+
+`docker compose down -v` stops everything and resets the database. Every push to `main` also publishes the image
+to GitHub Container Registry as `ghcr.io/penelope-liang/healthcare_operation_system:latest`.
 
 ### Frontend development (hot reload)
 
@@ -178,7 +209,17 @@ mvn verify
 ```
 
 This runs the JUnit + MockMvc tests: REST CRUD, validation, conflicts, the overview endpoints, Vue route forwarding,
-and behavior when MySQL is down.
+and behavior when MySQL is down. JaCoCo then writes a coverage report to `target/site/jacoco/index.html`, and the
+build fails if line coverage drops below 85%. CI shows the coverage numbers in each run's summary and uploads the
+full report as an artifact.
+
+## CI/CD
+
+| Workflow | Runs on | What it does |
+| --- | --- | --- |
+| `qa.yml` | every push and pull request | Builds the app, runs JUnit (with the coverage check), Vitest and Playwright (against MySQL 8), and uploads the coverage and Playwright reports |
+| `docker.yml` | pull requests and pushes to `main` | Builds the Docker image and smoke-tests it; on `main` it also publishes `latest` and `sha-<commit>` tags to GitHub Container Registry |
+| Dependabot | weekly | Opens pull requests for Maven, npm, GitHub Actions and Docker base image updates |
 
 ```bash
 npm install

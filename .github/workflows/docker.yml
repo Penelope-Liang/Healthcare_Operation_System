@@ -1,0 +1,72 @@
+name: Docker image
+
+# Builds the image on every pull request and smoke-tests it; on pushes to main it also
+# publishes it to GitHub Container Registry as ghcr.io/<owner>/<repo>:latest and :sha-<commit>.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Image tags and labels
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha
+            type=ref,event=pr
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: healthcare-dashboard:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test the image
+        run: |
+          docker run -d --name app -p 8080:8080 -e SPRING_PROFILES_ACTIVE=demo healthcare-dashboard:test
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/api/health; then break; fi
+            sleep 2
+          done
+          curl -fsS http://localhost:8080/api/health | grep -q '"database":"connected"'
+          curl -fsS http://localhost:8080/ | grep -q '<div id="app">'
+          curl -fsS http://localhost:8080/api/dashboard | grep -q '"patients":6'
+          docker logs app | tail -20
+          docker rm -f app
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha

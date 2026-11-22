@@ -18,7 +18,7 @@ This repository contains a web application only:
 - QA artifacts for test cases, defect reporting, traceability, and AI-assisted test review
 - Database-backed create/read tests for selected web workflows
 - Database-backed REST API CRUD tests for patients, clinics, vaccine lots, staff, shipments, and vaccination records
-- GitHub Actions pipeline for JUnit, Vitest, Playwright, API, and database-backed tests
+- GitHub Actions pipelines for JUnit (with a JaCoCo coverage gate), Vitest, Playwright UI/API tests against MySQL, and Docker image build, smoke test and publish; Dependabot dependency updates
 
 ## Not In Scope
 
