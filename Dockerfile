@@ -8,7 +8,7 @@
 # DB_NAME, DB_USER and DB_PASSWORD (see docker-compose.yml).
 
 # ---- 1. Build the Vue frontend --------------------------------------------------------
-FROM node:20-alpine AS frontend
+FROM node:26-alpine AS frontend
 WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-audit --no-fund
