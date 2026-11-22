@@ -17,7 +17,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # ---- 2. Build the Spring Boot jar -----------------------------------------------------
-FROM maven:3.9-eclipse-temurin-21 AS backend
+FROM maven:3.9-eclipse-temurin-26 AS backend
 WORKDIR /app
 COPY pom.xml ./
 # Download dependencies in their own layer so code changes don't re-download them.
