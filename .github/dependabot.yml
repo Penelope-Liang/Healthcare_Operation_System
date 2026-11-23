@@ -1,6 +1,7 @@
 # Dependabot opens pull requests when dependencies have updates or security fixes.
-# Minor and patch updates are grouped into one PR per ecosystem to keep the noise down;
-# major versions get their own PRs because they may need code changes.
+# Only minor and patch updates are proposed, grouped into one PR per ecosystem.
+# Major upgrades (e.g. Spring Boot 4, a newer Java or Node line in the Docker images) can
+# break the build, so they are skipped here and done deliberately in their own branch.
 version: 2
 updates:
   - package-ecosystem: maven
@@ -12,6 +13,9 @@ updates:
     groups:
       maven-minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: npm
     directory: /frontend
@@ -22,6 +26,9 @@ updates:
     groups:
       frontend-minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: npm
     directory: /
@@ -32,6 +39,9 @@ updates:
     groups:
       e2e-minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
@@ -41,9 +51,15 @@ updates:
     groups:
       github-actions:
         patterns: ["*"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
       day: monday
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
